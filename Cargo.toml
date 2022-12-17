@@ -1,0 +1,28 @@
+[package]
+name = "firesquare"
+version = "0.0.0"
+edition = "2021"
+
+[workspace]
+members = [
+  "firesquare-components",
+  "firesquare-launcher-ui",
+  "firesquare-launcher",
+  "firesquare-web-api",
+  "firesquare-web-ui",
+]
+
+[[bin]]
+name = "firesquare-api"
+path = "firesquare-web-api/src/main.rs"
+
+[[bin]]
+name = "firesquare-launcher"
+path = "firesquare-launcher/src/main.rs"
+
+[profile.release]
+debug = 1
+strip = true
+lto = true
+codegen-units = 1
+opt-level = 3
