@@ -1,4 +1,7 @@
-use gtk::{prelude::{BoxExt, ButtonExt, GtkWindowExt}, traits::OrientableExt};
+use gtk::{
+	prelude::{BoxExt, ButtonExt, GtkWindowExt},
+	traits::OrientableExt,
+};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 struct AppModel {
