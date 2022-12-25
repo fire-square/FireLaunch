@@ -292,9 +292,11 @@ dependencies = [
 name = "firesquare-launcher"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "dirs",
  "env_logger",
  "gtk4",
+ "hex",
  "log",
  "log-panics",
  "rand",
@@ -304,6 +306,7 @@ dependencies = [
  "reqwest",
  "sha1",
  "sha256",
+ "thiserror",
  "tokio",
  "tracker",
 ]

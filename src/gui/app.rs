@@ -1,29 +1,32 @@
+//! AppModel is the main component of the application.
+//!
+//! It contains the main window and all other components. It is responsible for
+//! handling all user input and launching the game.
+
+use super::CSS;
 use gtk::{
 	prelude::{BoxExt, ButtonExt, OrientableExt},
 	traits::GtkWindowExt,
 };
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate relm4;
-// #[macro_use]
-// extern crate tracker;
+/// AppModel state.
+///
+/// Empty for now.
+pub struct AppModel;
 
-struct AppModel;
-
+/// AppModel commands.
 #[derive(Debug)]
-enum AppInput {
+pub enum AppInput {
+	/// Launch minecraft.
 	LaunchMinecraft,
 }
 
-#[component]
+/// AppModel component implementation.
+#[component(pub)]
 impl SimpleComponent for AppModel {
 	type Widgets = AppWidgets;
-
 	type Init = ();
-
 	type Input = AppInput;
 	type Output = ();
 
@@ -51,7 +54,6 @@ impl SimpleComponent for AppModel {
 		}
 	}
 
-	// Initialize the UI.
 	fn init(
 		_params: Self::Init,
 		root: &Self::Root,
@@ -74,23 +76,13 @@ impl SimpleComponent for AppModel {
 	}
 }
 
-fn main() {
-	if std::env::var("RUST_LOG").is_err() {
-		std::env::set_var("RUST_LOG", "info");
+impl AppModel {
+	/// Launch application.
+	///
+	/// This function is called from `main.rs`.
+	pub fn launch() {
+		let app = RelmApp::new("xyz.frsqr.launcher");
+		relm4::set_global_css(CSS);
+		app.run::<AppModel>(());
 	}
-	env_logger::init();
-	log_panics::init();
-
-	// Get package info
-	const VERSION: &str = env!("CARGO_PKG_VERSION");
-	const NAME: &str = env!("CARGO_PKG_NAME");
-
-	// Load the CSS file
-	const CSS: &str = include_str!("../style.css");
-
-	info!("Running {} {}", NAME, VERSION);
-
-	let app = RelmApp::new("xyz.frsqr.launcher");
-	relm4::set_global_css(CSS);
-	app.run::<AppModel>(());
 }
