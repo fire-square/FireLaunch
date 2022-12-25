@@ -1,87 +1,96 @@
 use gtk::{
-	prelude::{BoxExt, ButtonExt, GtkWindowExt},
-	traits::OrientableExt,
+	prelude::{BoxExt, ButtonExt, OrientableExt},
+	traits::GtkWindowExt,
 };
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
-struct AppModel {
-	counter: i64,
-}
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate relm4;
+#[macro_use]
+extern crate tracker;
+
+struct AppModel;
 
 #[derive(Debug)]
 enum AppInput {
-	Increment,
-	Decrement,
+	LaunchMinecraft,
 }
 
-#[relm4::component]
+#[component]
 impl SimpleComponent for AppModel {
 	type Widgets = AppWidgets;
 
-	type Init = i64;
+	type Init = ();
 
 	type Input = AppInput;
 	type Output = ();
 
 	view! {
-		gtk::Window {
-			set_title: Some("firesquare launcher"),
-			set_default_width: 300,
-			set_default_height: 100,
-
+		#[root]
+		gtk::ApplicationWindow {
+			set_title: Some("FireLaunch"),
 			gtk::Box {
 				set_orientation: gtk::Orientation::Vertical,
 				set_spacing: 5,
-				set_margin_all: 5,
-
-				gtk::Button::with_label("Increment") {
+				set_margin_all: 10,
+				gtk::Button {
+					set_label: "Запустить minecraft",
 					connect_clicked[sender] => move |_| {
-						sender.input(AppInput::Increment);
+						sender.input(AppInput::LaunchMinecraft)
 					}
 				},
-
-				gtk::Button::with_label("Decrement") {
+				append = &gtk::Button {
+					set_label: "Заставить кофоба работать",
 					connect_clicked[sender] => move |_| {
-						sender.input(AppInput::Decrement);
+						sender.input(AppInput::LaunchMinecraft)
 					}
 				},
-
-				gtk::Label {
-					#[watch]
-					set_label: &format!("Counter: {}", model.counter),
-					set_margin_all: 5,
-				}
 			}
 		}
 	}
 
 	// Initialize the UI.
 	fn init(
-		counter: Self::Init,
+		_params: Self::Init,
 		root: &Self::Root,
 		sender: ComponentSender<Self>,
 	) -> ComponentParts<Self> {
-		let model = AppModel { counter };
+		let model = AppModel {};
 
-		// Insert the macro code generation here
 		let widgets = view_output!();
 
 		ComponentParts { model, widgets }
 	}
 
-	fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
-		match msg {
-			AppInput::Increment => {
-				self.counter = self.counter.wrapping_add(1);
-			}
-			AppInput::Decrement => {
-				self.counter = self.counter.wrapping_sub(1);
+	fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+		match message {
+			AppInput::LaunchMinecraft => {
+				info!("Launching minecraft");
+				todo!("Launch minecraft")
 			}
 		}
 	}
 }
 
 fn main() {
+	if std::env::var("RUST_LOG").is_err() {
+		std::env::set_var("RUST_LOG", "info");
+	}
+	env_logger::init();
+
+	// Get package version
+	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+	// Get package name
+	const NAME: &'static str = env!("CARGO_PKG_NAME");
+
+	// Load the CSS file
+	const CSS: &'static str = include_str!("../style.css");
+
+	info!("Running {} {}", NAME, VERSION);
+
 	let app = RelmApp::new("xyz.frsqr.launcher");
-	app.run::<AppModel>(100);
+	relm4::set_global_css(CSS);
+	app.run::<AppModel>(());
 }

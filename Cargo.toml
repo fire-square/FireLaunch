@@ -11,6 +11,7 @@ gtk4 = "^0.5"
 relm4 = "0.5.0-rc.1" # gui framework
 relm4-macros = "0.5.0-rc.1"
 relm4-components = "0.5.0-rc.1"
+tracker = "^0.2" # struct change tracking
 
 # logging
 log = "^0.4" # logging facade
@@ -19,12 +20,16 @@ env_logger = "^0.10" # logging formatter
 # networking
 reqwest = "^0.11" # async https client
 
+# async
+tokio = { version = "^1.0", features = ["full"] } # async runtime
+
 # filesystem
 dirs = "^4.0" # well known dirs
 
 # crypto
 sha1 = "^0.10" # for minecraft
 sha256 = "^1" # for authorization
+rand = "^0.8" # salt generation
 
 [profile.release]
 overflow-checks = true
