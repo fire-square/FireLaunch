@@ -5,7 +5,7 @@
 //!
 //! It is written with relm4 and uses GTK4 for UI.
 //!
-//! **Currently it is in early development stage. Crate published only to claim name.**
+//! **Currently it is in early development stage.**
 //!
 //! ## Features
 //!
