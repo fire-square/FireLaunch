@@ -12,8 +12,8 @@
 /// ```
 /// use firesquare_launcher::utils::ipfs;
 ///
-/// let url = ipfs!("QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N/file.txt");
-/// assert_eq!(url, "https://ipfs.frsqr.xyz/ipfs/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N/file.txt");
+/// let url = ipfs!("bafybeih764jjsjnf5inznxgifpzuzinhgn4565sxxqtl2vuylaawc6mzf4/hello.txt");
+/// assert_eq!(url, "https://ipfs.frsqr.xyz/ipfs/bafybeih764jjsjnf5inznxgifpzuzinhgn4565sxxqtl2vuylaawc6mzf4/hello.txt");
 /// ```
 #[macro_export]
 macro_rules! ipfs {
@@ -29,10 +29,10 @@ pub use ipfs;
 mod tests {
 	#[test]
 	fn test_ipfs_macro() {
-		let url = ipfs!("QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N/file.txt");
+		let url = ipfs!("bafybeih764jjsjnf5inznxgifpzuzinhgn4565sxxqtl2vuylaawc6mzf4/hello.txt");
 		assert_eq!(
 			url,
-			"https://ipfs.frsqr.xyz/ipfs/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N/file.txt"
+			"https://ipfs.frsqr.xyz/ipfs/bafybeih764jjsjnf5inznxgifpzuzinhgn4565sxxqtl2vuylaawc6mzf4/hello.txt"
 		);
 	}
 }
