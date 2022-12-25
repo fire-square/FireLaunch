@@ -8,8 +8,8 @@ use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, Simple
 extern crate log;
 #[macro_use]
 extern crate relm4;
-#[macro_use]
-extern crate tracker;
+// #[macro_use]
+// extern crate tracker;
 
 struct AppModel;
 
