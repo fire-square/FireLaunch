@@ -7,7 +7,7 @@ on:
 env:
   RUSTFLAGS: -Dwarnings
   RUST_BACKTRACE: full
-  PACKAGES: libcairo2-dev libpango1.0-dev libssl-dev pkg-config libgraphene-1.0-dev
+  PACKAGES: libcairo2-dev libpango1.0-dev libssl-dev pkg-config libgraphene-1.0-dev libgtk-4-dev libglib2.0-dev libgdk-pixbuf2.0-dev
 
 concurrency:
   group: ci-${{ github.ref }}
