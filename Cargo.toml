@@ -6,6 +6,7 @@ description = "firesquare minecraft launcher"
 authors = ["Egor Ternovoy <cofob@riseup.net>"]
 repository = "https://github.com/fire-square/FireLaunch"
 license = "GPL-3.0-or-later"
+include = ["/src", "/LICENSE", "/style.css"]
 
 [dependencies]
 # gtk4 gui
