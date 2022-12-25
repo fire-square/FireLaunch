@@ -12,4 +12,4 @@ pub mod app;
 pub use app::AppModel;
 
 /// Application CSS.
-const CSS: &str = include_str!("../../style.css");
+pub const CSS: &str = include_str!("../../style.css");
