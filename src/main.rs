@@ -79,6 +79,7 @@ fn main() {
 		std::env::set_var("RUST_LOG", "info");
 	}
 	env_logger::init();
+	log_panics::init();
 
 	// Get package info
 	const VERSION: &str = env!("CARGO_PKG_VERSION");

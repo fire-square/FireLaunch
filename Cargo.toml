@@ -16,6 +16,7 @@ tracker = "^0.2" # struct change tracking
 # logging
 log = "^0.4" # logging facade
 env_logger = "^0.10" # logging formatter
+log-panics = { version = "^2", features = ["with-backtrace"] } # log panics
 
 # networking
 reqwest = "^0.11" # async https client
