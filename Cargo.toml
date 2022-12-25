@@ -37,6 +37,7 @@ tokio = { version = "^1.0", features = ["full"] } # async runtime
 
 # filesystem
 dirs = "^4.0" # well known dirs
+zip = "^0.6" # zip (jar) file handling
 
 # crypto
 sha1 = "^0.10" # for minecraft assets
