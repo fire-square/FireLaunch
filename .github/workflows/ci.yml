@@ -7,6 +7,7 @@ on:
 env:
   RUSTFLAGS: -Dwarnings
   RUST_BACKTRACE: full
+  PACKAGES: libcairo2-dev libpango1.0-dev libssl-dev pkg-config
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -29,6 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run:
+          sudo apt-get update
+          sudo apt-get install -y $PACKAGES
       - uses: sfackler/actions/rustup@master
       - run: echo "::set-output name=version::$(rustc --version)"
         id: rust-version
@@ -75,9 +79,9 @@ jobs:
       - run: echo "::set-output name=version::$(rustc --version)"
         id: rust-version
       - run: rustup target add x86_64-unknown-linux-gnu
-      - run: |
+      - run:
           sudo apt-get update
-          sudo apt-get install -y libssl-dev pkg-config openssl
+          sudo apt-get install -y $PACKAGES
       - uses: Swatinem/rust-cache@v2
         with:
           key: "linux"
