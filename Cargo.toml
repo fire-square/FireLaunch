@@ -26,7 +26,11 @@ anyhow = "^1.0" # error handling
 thiserror = "^1.0" # for creating custom errors
 
 # networking
-reqwest = "^0.11" # async https client
+reqwest = { version = "^0.11", features = ["json"] } # async http client
+
+# serialization
+serde = { version = "^1.0", features = ["derive"] } # serialization
+serde_json = "^1.0" # json serialization
 
 # async
 tokio = { version = "^1.0", features = ["full"] } # async runtime
