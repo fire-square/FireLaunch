@@ -4,7 +4,7 @@
 //!
 //! Main component is [`AppModel`].
 //!
-//! [`AppModel`]: struct.AppModel.html
+//! [`AppModel`]: app/struct.AppModel.html
 
 pub mod app;
 
