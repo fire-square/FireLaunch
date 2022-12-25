@@ -112,7 +112,7 @@ mod tests {
 	#[tokio::test]
 	async fn test_download_to() {
 		let client = Client::new();
-		download_to(&client, "https://ipfs.frsqr.xyz/ipfs/bafybeih764jjsjnf5inznxgifpzuzinhgn4565sxxqtl2vuylaawc6mzf4/hello.txt", &Path::new("hello.txt")).await.unwrap();
+		download_to(&client, "https://ipfs.frsqr.xyz/ipfs/bafybeih764jjsjnf5inznxgifpzuzinhgn4565sxxqtl2vuylaawc6mzf4/hello.txt", Path::new("hello.txt")).await.unwrap();
 
 		// Check that the file was downloaded
 		assert!(Path::new("hello.txt").exists());
