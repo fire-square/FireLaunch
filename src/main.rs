@@ -80,13 +80,12 @@ fn main() {
 	}
 	env_logger::init();
 
-	// Get package version
-	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-	// Get package name
-	const NAME: &'static str = env!("CARGO_PKG_NAME");
+	// Get package info
+	const VERSION: &str = env!("CARGO_PKG_VERSION");
+	const NAME: &str = env!("CARGO_PKG_NAME");
 
 	// Load the CSS file
-	const CSS: &'static str = include_str!("../style.css");
+	const CSS: &str = include_str!("../style.css");
 
 	info!("Running {} {}", NAME, VERSION);
 
