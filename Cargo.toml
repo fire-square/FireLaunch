@@ -1,28 +1,36 @@
 [package]
-name = "firesquare"
-version = "0.0.0"
-edition = "2021"
-
-[workspace]
-members = [
-  "firesquare-components",
-  "firesquare-launcher-ui",
-  "firesquare-launcher",
-  "firesquare-web-api",
-  "firesquare-web-ui",
-]
-
-[[bin]]
-name = "firesquare-api"
-path = "firesquare-web-api/src/main.rs"
-
-[[bin]]
 name = "firesquare-launcher"
-path = "firesquare-launcher/src/main.rs"
+version = "0.1.0"
+edition = "2021"
+description = "firesquare minecraft launcher"
+authors = ["Egor Ternovoy <cofob@riseup.net>"]
+
+[dependencies]
+# gtk4 gui
+gtk4 = "^0.5"
+relm4 = "0.5.0-rc.1" # gui framework
+relm4-macros = "0.5.0-rc.1"
+relm4-components = "0.5.0-rc.1"
+
+# logging
+log = "^0.4" # logging facade
+env_logger = "^0.10" # logging formatter
+
+# networking
+reqwest = "^0.11" # async https client
+
+# filesystem
+dirs = "^4.0" # well known dirs
+
+# crypto
+sha1 = "^0.10" # for minecraft
+sha256 = "^1" # for authorization
 
 [profile.release]
+overflow-checks = true
+incremental = false
+codegen-units = 1
+opt-level = 3
 debug = 1
 strip = true
 lto = true
-codegen-units = 1
-opt-level = 3
