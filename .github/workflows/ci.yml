@@ -41,34 +41,34 @@ jobs:
           key: "clippy"
       - run: cargo clippy --all --all-targets
 
-  windows:
-    name: windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: sfackler/actions/rustup@master
-      - run: echo "::set-output name=version::$(rustc --version)"
-        id: rust-version
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cargo
-          key: cargo-${{ runner.os }}-${{ steps.rust-version.outputs.version }}-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            cargo-${{ runner.os }}-${{ steps.rust-version.outputs.version }}-
-            cargo-${{ runner.os }}-
-      - uses: actions/cache@v3
-        with:
-          path: target
-          key: target-${{ github.job }}-${{ steps.rust-version.outputs.version }}-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            cargo-${{ runner.os }}-${{ steps.rust-version.outputs.version }}-
-            cargo-${{ runner.os }}-
-      - run: cargo test
-      - run: cargo build --release
-      - uses: actions/upload-artifact@v3
-        with:
-          name: windows
-          path: target/release/firesquare-launcher.exe
+  # windows:
+  #   name: windows
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: sfackler/actions/rustup@master
+  #     - run: echo "::set-output name=version::$(rustc --version)"
+  #       id: rust-version
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: ~/.cargo
+  #         key: cargo-${{ runner.os }}-${{ steps.rust-version.outputs.version }}-${{ hashFiles('Cargo.lock') }}
+  #         restore-keys: |
+  #           cargo-${{ runner.os }}-${{ steps.rust-version.outputs.version }}-
+  #           cargo-${{ runner.os }}-
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: target
+  #         key: target-${{ github.job }}-${{ steps.rust-version.outputs.version }}-${{ hashFiles('Cargo.lock') }}
+  #         restore-keys: |
+  #           cargo-${{ runner.os }}-${{ steps.rust-version.outputs.version }}-
+  #           cargo-${{ runner.os }}-
+  #     - run: cargo test
+  #     - run: cargo build --release
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: windows
+  #         path: target/release/firesquare-launcher.exe
 
   linux:
     name: linux
