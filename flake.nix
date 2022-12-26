@@ -3,12 +3,19 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    rust-overlay.url = "github:oxalica/rust-overlay";
-    import-cargo.url = github:edolstra/import-cargo;
+
     flake-utils.url = "github:numtide/flake-utils";
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
+    import-cargo.url = github:edolstra/import-cargo;
   };
 
-  outputs = { self, nixpkgs, rust-overlay, import-cargo, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-utils, rust-overlay, import-cargo, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
