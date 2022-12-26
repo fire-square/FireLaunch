@@ -1,4 +1,6 @@
 /target/
 /dist/
 /.direnv/
+/win_res.res
+/*-install.exe
 result
