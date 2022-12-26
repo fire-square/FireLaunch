@@ -21,7 +21,7 @@ jobs:
     name: rustfmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: sfackler/actions/rustup@master
       - run: cargo fmt --all -- --check
 
@@ -29,7 +29,7 @@ jobs:
     name: clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           sudo apt-get update
           sudo apt-get install -y $PACKAGES
@@ -45,7 +45,7 @@ jobs:
   #   name: windows
   #   runs-on: windows-latest
   #   steps:
-  #     - uses: actions/checkout@v2
+  #     - uses: actions/checkout@v3
   #     - uses: sfackler/actions/rustup@master
   #     - run: echo "::set-output name=version::$(rustc --version)"
   #       id: rust-version
@@ -74,7 +74,7 @@ jobs:
     name: linux
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: sfackler/actions/rustup@master
       - run: echo "::set-output name=version::$(rustc --version)"
         id: rust-version
