@@ -7,7 +7,7 @@ on:
 env:
   RUSTFLAGS: -Dwarnings
   RUST_BACKTRACE: full
-  PACKAGES: gnome-devel
+  PACKAGES: gnome-devel libadwaita-1-dev
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -32,7 +32,8 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
           sudo apt-get update
-          sudo apt-get install -y $PACKAGES
+          sudo apt-get install -y eatmydata
+          sudo eatmydata apt-get install -y $PACKAGES
       - uses: sfackler/actions/rustup@master
       - run: echo "::set-output name=version::$(rustc --version)"
         id: rust-version
@@ -81,7 +82,8 @@ jobs:
       - run: rustup target add x86_64-unknown-linux-gnu
       - run: |
           sudo apt-get update
-          sudo apt-get install -y $PACKAGES
+          sudo apt-get install -y eatmydata
+          sudo eatmydata apt-get install -y $PACKAGES
       - uses: Swatinem/rust-cache@v2
         with:
           key: "linux"
