@@ -45,6 +45,9 @@ sha256 = "^1" # for authorization
 hex = "^0.4" # for converting bytes to hex
 rand = "^0.8" # salt generation
 
+[build-dependencies]
+embed-resource = "1.8" # embed assets into binary (windows)
+
 [profile.release]
 overflow-checks = true
 incremental = false
