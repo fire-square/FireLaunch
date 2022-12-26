@@ -1,4 +1,4 @@
 /target/
 /dist/
-.direnv
+/.direnv/
 result
