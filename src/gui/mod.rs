@@ -7,8 +7,8 @@
 //! [`AppModel`]: app/struct.AppModel.html
 
 pub mod app;
+pub mod components;
 
-/// Re-export of [`AppModel`].
 pub use app::AppModel;
 
 /// Application CSS.
