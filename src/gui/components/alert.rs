@@ -15,12 +15,14 @@ pub struct AlertSettings {
 	pub is_modal: bool,
 	/// Sets color of the accept button to red if the theme supports it
 	pub destructive_accept: bool,
-	/// Text for confirm button
+	/// Label of the confirm button. Type of the button is [`gtk::ResponseType::Ok`].
 	pub confirm_label: String,
-	/// Text for cancel button
-	pub cancel_label: String,
-	/// Text for third option button. If [`None`] the third button won't be created.
+	/// Label of the cancel button. If [`None`], the button is not created. Type of the button is [`gtk::ResponseType::Cancel`].
+	pub cancel_label: Option<String>,
+	/// Label of the option button. If [`None`], the button is not created. Type of the button is [`gtk::ResponseType::Other(0)`].
 	pub option_label: Option<String>,
+	/// Alert type
+	pub alert_type: gtk::MessageType,
 }
 
 /// Alert dialog component.
@@ -41,11 +43,11 @@ pub enum AlertMsg {
 /// User action performed on the alert dialog.
 #[derive(Debug)]
 pub enum AlertResponse {
-	/// User clicked confirm button.
+	/// User clicked the first button
 	Confirm,
-	/// User clicked cancel button.
+	/// User clicked the second button
 	Cancel,
-	/// User clicked user-supplied option.
+	/// User clicked the third button
 	Option,
 }
 
@@ -60,7 +62,7 @@ impl SimpleComponent for Alert {
 	view! {
 		#[name = "dialog"]
 		gtk::MessageDialog {
-			set_message_type: gtk::MessageType::Question,
+			set_message_type: model.settings.alert_type,
 			#[watch]
 			set_visible: model.is_active,
 			connect_response[sender] => move |_, response| {
@@ -71,8 +73,7 @@ impl SimpleComponent for Alert {
 			set_text: Some(&model.settings.text),
 			set_secondary_text: model.settings.secondary_text.as_deref(),
 			set_modal: model.settings.is_modal,
-			add_button: (&model.settings.confirm_label, gtk::ResponseType::Accept),
-			add_button: (&model.settings.cancel_label, gtk::ResponseType::Cancel),
+			add_button: (&model.settings.confirm_label, gtk::ResponseType::Ok),
 		}
 	}
 
@@ -88,16 +89,22 @@ impl SimpleComponent for Alert {
 
 		let widgets = view_output!();
 
-		if let Some(option_label) = &model.settings.option_label {
+		if let Some(btn2_label) = &model.settings.cancel_label {
 			widgets
 				.dialog
-				.add_button(option_label, gtk::ResponseType::Other(0));
+				.add_button(btn2_label, gtk::ResponseType::Cancel);
+		}
+
+		if let Some(btn3_label) = &model.settings.option_label {
+			widgets
+				.dialog
+				.add_button(btn3_label, gtk::ResponseType::Other(0));
 		}
 
 		if model.settings.destructive_accept {
 			let accept_widget = widgets
 				.dialog
-				.widget_for_response(gtk::ResponseType::Accept)
+				.widget_for_response(gtk::ResponseType::Ok)
 				.expect("No button for accept response set");
 			accept_widget.add_css_class("destructive-action");
 		}
@@ -113,8 +120,8 @@ impl SimpleComponent for Alert {
 			AlertMsg::Response(ty) => {
 				self.is_active = false;
 				let _ = sender.output(match ty {
-					gtk::ResponseType::Accept => AlertResponse::Confirm,
-					gtk::ResponseType::Other(_) => AlertResponse::Option,
+					gtk::ResponseType::Ok => AlertResponse::Confirm,
+					gtk::ResponseType::Other(0) => AlertResponse::Option,
 					_ => AlertResponse::Cancel,
 				});
 			}

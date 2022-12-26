@@ -24,7 +24,7 @@ pub struct SharedState {
 /// AppModel state.
 pub struct AppModel {
 	// state: Arc<SharedState>,
-	dialog: Controller<Alert>,
+	force_cofob_dialog: Controller<Alert>,
 }
 
 /// AppModel commands.
@@ -78,16 +78,17 @@ impl SimpleComponent for AppModel {
 	) -> ComponentParts<Self> {
 		let model = AppModel {
 			// state: Arc::new(params),
-			dialog: Alert::builder()
+			force_cofob_dialog: Alert::builder()
 				.transient_for(root)
 				.launch(AlertSettings {
 					text: String::from("Кофоба невозможно заставить работать"),
 					secondary_text: Some(String::from("И че ты мне сделаешь?)")),
 					confirm_label: String::from("Ничего"),
-					cancel_label: String::from("Ничего"),
+					cancel_label: None,
 					option_label: None,
 					is_modal: true,
 					destructive_accept: true,
+					alert_type: gtk::MessageType::Info,
 				})
 				.forward(sender.input_sender(), convert_alert_response),
 		};
@@ -104,7 +105,7 @@ impl SimpleComponent for AppModel {
 				todo!("Launch minecraft")
 			}
 			AppMsg::ForceCofob => {
-				self.dialog.emit(AlertMsg::Show);
+				self.force_cofob_dialog.emit(AlertMsg::Show);
 			}
 			AppMsg::Ignore => {}
 		}
