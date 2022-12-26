@@ -3,8 +3,6 @@
 //! It contains the main window and all other components. It is responsible for
 //! handling all user input and launching the game.
 
-use std::sync::Arc;
-
 use super::components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use super::CSS;
 use crate::utils::net::NetClient;
@@ -25,7 +23,7 @@ pub struct SharedState {
 
 /// AppModel state.
 pub struct AppModel {
-	state: Arc<SharedState>,
+	// state: Arc<SharedState>,
 	dialog: Controller<Alert>,
 }
 
@@ -73,12 +71,12 @@ impl SimpleComponent for AppModel {
 	}
 
 	fn init(
-		params: Self::Init,
+		_params: Self::Init,
 		root: &Self::Root,
 		sender: ComponentSender<Self>,
 	) -> ComponentParts<Self> {
 		let model = AppModel {
-			state: Arc::new(params),
+			// state: Arc::new(params),
 			dialog: Alert::builder()
 				.transient_for(root)
 				.launch(AlertSettings {
