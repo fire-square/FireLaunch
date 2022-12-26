@@ -6,7 +6,7 @@
 ;
 
 ; HM NIS Edit Wizard helper defines
-!define PRODUCT_NAME "FireLaucnh"
+!define PRODUCT_NAME "FireLaunch"
 !define PRODUCT_VERSION "0.1.0"
 !define PRODUCT_PUBLISHER "Egor Ternovoy"
 !define PRODUCT_WEB_SITE "https://frsqr.xyz/"
