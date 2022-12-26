@@ -42,6 +42,10 @@ jobs:
           key: "clippy"
       - run: cargo clippy --all --all-targets
 
+  # Unfortunately building on Windows is very hard, because of the hard GTK dependencies installation.
+  # 1. Install msys2
+  # 2. Install GTK dependencies via pacman
+  # 3. Install Cargo and Rust via rustup
   # windows:
   #   name: windows
   #   runs-on: windows-latest
