@@ -28,6 +28,7 @@ extern crate relm4;
 
 pub mod gui;
 pub mod storage;
+pub mod structures;
 pub mod utils;
 
 /// Name of the application.

@@ -11,6 +11,7 @@
 
 use std::sync::Arc;
 
+use crate::structures::asset_index::{AssetIndex, AssetIndexError};
 use crate::{storage::Storage, utils::net::NetClient};
 
 use super::app::AppMsg;
@@ -55,6 +56,20 @@ impl AsyncWorkerModel {
 			debug!("Internet is available");
 		}
 	}
+
+	/// Download assets.
+	async fn download_assets(storage: Arc<Storage>) -> Result<(), AssetIndexError> {
+		let hash = "0b32008ac3174dae0df463fc31f693b55c6deefc".to_string();
+		let index = AssetIndex::download(
+			&storage,
+			&hash,
+			"bafkreifpqxcl7lfwhpalqlxd7g4i5wpxtgu6ljxlapdistgm422qt2s3wa",
+		)
+		.await?;
+		index.save(&storage, &hash).await?;
+		index.download_all(&storage).await?;
+		Ok(())
+	}
 }
 
 impl Worker for AsyncWorkerModel {
@@ -80,10 +95,8 @@ impl Worker for AsyncWorkerModel {
 				));
 			}
 			AsyncWorkerMsg::HelloWorld => {
-				self.runtime.spawn(async move {
-					tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-					info!("Hello world from async worker");
-				});
+				self.runtime
+					.spawn(AsyncWorkerModel::download_assets(self.storage.clone()));
 			}
 		}
 	}

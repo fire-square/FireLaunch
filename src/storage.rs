@@ -69,6 +69,13 @@ impl Storage {
 			.join(sha1_hash)
 	}
 
+	/// Get index path.
+	pub fn get_index_path(&self, sha1_hash: &str) -> PathBuf {
+		self.storage_dir
+			.join("indexes")
+			.join(format!("{sha1_hash}.json"))
+	}
+
 	/// Download object from the given URL to the given path.
 	///
 	/// This function will also verify the hash of the downloaded object.
@@ -119,13 +126,16 @@ impl Storage {
 	) -> Result<PathBuf, StorageError> {
 		let dest_path = self.get_asset_path(sha1_hash);
 		if !dest_path.exists() {
+			debug!("Asset doesn't exist, downloading: {}", sha1_hash);
 			self.download_asset(sha1_hash, path).await?;
 			return Ok(dest_path);
 		}
 		if !self.check_asset(sha1_hash).await? {
+			debug!("Asset has wrong hash, downloading: {}", sha1_hash);
 			self.download_asset(sha1_hash, path).await?;
 			return Ok(dest_path);
 		}
+		debug!("Asset is valid, skipping download: {}", sha1_hash);
 		Ok(dest_path)
 	}
 
