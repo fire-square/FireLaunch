@@ -18,6 +18,9 @@ pub enum StorageError {
 	/// Network error.
 	#[error("Network error: {0}")]
 	NetworkError(#[from] crate::utils::net::NetworkError),
+	/// Hash mismatch error.
+	#[error("Hash mismatch: {0} (expected) != {1} (actual)")]
+	HashMismatch(String, String),
 }
 
 #[derive(Debug)]
@@ -64,6 +67,8 @@ impl Storage {
 	}
 
 	/// Download object from the given URL to the given path.
+	///
+	/// This function will also verify the hash of the downloaded object.
 	pub async fn download_asset(
 		&self,
 		sha1_hash: &str,
@@ -71,14 +76,26 @@ impl Storage {
 	) -> Result<PathBuf, StorageError> {
 		let dest_path = self.get_asset_path(sha1_hash);
 		tokio::fs::create_dir_all(dest_path.parent().unwrap()).await?;
-		self.state
+		let downloaded_hash = self
+			.state
 			.net_client
-			.download_to(&self.state.net_client.ipfs(path), &dest_path)
+			.download_and_hash(&self.state.net_client.ipfs(path), &dest_path)
 			.await?;
+		if sha1_hash != downloaded_hash {
+			return Err(StorageError::HashMismatch(
+				sha1_hash.to_string(),
+				downloaded_hash,
+			));
+		}
 		Ok(dest_path)
 	}
 
 	/// Download object if it doesn't exist.
+	///
+	/// If the object already exists, this function will return the path to the
+	/// existing object without downloading or verifying it again.
+	/// If the object doesn't exist, this function will download it and verify
+	/// its hash.
 	pub async fn download_asset_if_not_exists(
 		&self,
 		sha1_hash: &str,
@@ -87,6 +104,24 @@ impl Storage {
 		let dest_path = self.get_asset_path(sha1_hash);
 		if !dest_path.exists() {
 			self.download_asset(sha1_hash, path).await?;
+		}
+		Ok(dest_path)
+	}
+
+	/// Download object if it doesn't exist or has the wrong hash.
+	pub async fn download_asset_if_invalid(
+		&self,
+		sha1_hash: &str,
+		path: &str,
+	) -> Result<PathBuf, StorageError> {
+		let dest_path = self.get_asset_path(sha1_hash);
+		if !dest_path.exists() {
+			self.download_asset(sha1_hash, path).await?;
+			return Ok(dest_path);
+		}
+		if !self.check_asset(sha1_hash).await? {
+			self.download_asset(sha1_hash, path).await?;
+			return Ok(dest_path);
 		}
 		Ok(dest_path)
 	}
