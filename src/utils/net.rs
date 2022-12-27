@@ -69,11 +69,7 @@ impl NetClient {
 	/// Downloads a file from the given URL to the given path and returns its hash.
 	///
 	/// See [`download_and_hash`] for details.
-	pub async fn download_and_hash(
-		&self,
-		url: &str,
-		path: &Path,
-	) -> Result<String, NetworkError> {
+	pub async fn download_and_hash(&self, url: &str, path: &Path) -> Result<String, NetworkError> {
 		download_and_hash(&self.client, url, path).await
 	}
 
@@ -214,7 +210,11 @@ pub async fn download_to(client: &Client, url: &str, path: &Path) -> Result<(), 
 /// - [`NetworkError::NetworkError`] if there was an error while downloading the file.
 /// - [`NetworkError::IOError`] if there was an error while writing the file.
 /// - [`NetworkError::DirectoryNotExists`] if the parent directory of the given path does not exist.
-pub async fn download_and_hash(client: &Client, url: &str, path: &Path) -> Result<String, NetworkError> {
+pub async fn download_and_hash(
+	client: &Client,
+	url: &str,
+	path: &Path,
+) -> Result<String, NetworkError> {
 	if path.parent().is_none() {
 		return Err(NetworkError::DirectoryNotExists(
 			path.to_str().unwrap().to_string(),
