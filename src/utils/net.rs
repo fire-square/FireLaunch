@@ -23,8 +23,10 @@ pub enum NetworkError {
 /// Network client.
 ///
 /// This is a wrapper around [`reqwest::Client`] and functions in this module.
+#[derive(Debug, Clone)]
 pub struct NetClient {
 	client: Client,
+	ipfs_gateway: String,
 }
 
 impl NetClient {
@@ -32,12 +34,23 @@ impl NetClient {
 	pub fn new() -> Self {
 		Self {
 			client: Client::new(),
+			ipfs_gateway: "https://ipfs.frsqr.xyz/ipfs/".to_string(),
 		}
 	}
 
 	/// Creates a new network client from the given [`reqwest::Client`].
 	pub fn from_client(client: Client) -> Self {
-		Self { client }
+		Self {
+			client,
+			ipfs_gateway: "https://ipfs.frsqr.xyz/ipfs/".to_string(),
+		}
+	}
+
+	/// Sets the IPFS gateway URL.
+	///
+	/// The default value is `https://ipfs.frsqr.xyz/ipfs/`.
+	pub fn set_ipfs_gateway(&mut self, url: &str) {
+		self.ipfs_gateway = url.to_string();
 	}
 
 	/// Returns a reference to the underlying [`reqwest::Client`].
@@ -50,6 +63,22 @@ impl NetClient {
 	/// See [`download_to`] for details.
 	pub async fn download_to(&self, url: &str, path: &Path) -> Result<(), NetworkError> {
 		download_to(&self.client, url, path).await
+	}
+
+	/// Gets the IPFS gateway URL for the given CID (or path).
+	///
+	/// You can change the IPFS gateway URL by using [`NetClient::set_ipfs_gateway`].
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use firesquare_launcher::utils::net::NetClient;
+	///
+	/// let client = NetClient::new();
+	/// assert_eq!("https://ipfs.frsqr.xyz/ipfs/CID", client.ipfs("CID"));
+	/// ```
+	pub fn ipfs(&self, cid: &str) -> String {
+		format!("{}/{cid}", self.ipfs_gateway)
 	}
 
 	/// Proxy for [`reqwest::Client::get`].
