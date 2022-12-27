@@ -33,10 +33,7 @@ impl Storage {
 	/// Creates a new storage.
 	///
 	/// This function will create all required directories if they don't exist.
-	pub fn new(
-		state: Arc<SharedState>,
-		storage_dir_opt: Option<PathBuf>,
-	) -> Result<Self, StorageError> {
+	pub fn new(state: Arc<SharedState>, storage_dir_opt: Option<PathBuf>) -> Self {
 		let storage_dir = match storage_dir_opt {
 			Some(dir) => dir,
 			None => data_dir().unwrap().join("FireLaunch"),
@@ -55,7 +52,7 @@ impl Storage {
 			}
 		}
 
-		Ok(Self { storage_dir, state })
+		Self { storage_dir, state }
 	}
 
 	/// Get asset path.
@@ -74,6 +71,7 @@ impl Storage {
 		sha1_hash: &str,
 		path: &str,
 	) -> Result<PathBuf, StorageError> {
+		debug!("Downloading asset: {}", sha1_hash);
 		let dest_path = self.get_asset_path(sha1_hash);
 		tokio::fs::create_dir_all(dest_path.parent().unwrap()).await?;
 		let downloaded_hash = self

@@ -158,6 +158,7 @@ impl Default for NetClient {
 /// - [`NetworkError::IOError`] if there was an error while writing the file.
 /// - [`NetworkError::DirectoryNotExists`] if the parent directory of the given path does not exist.
 pub async fn download_to(client: &Client, url: &str, path: &Path) -> Result<(), NetworkError> {
+	debug!("Downloading file from {} to {}", url, path.display());
 	if path.parent().is_none() {
 		return Err(NetworkError::DirectoryNotExists(
 			path.to_str().unwrap().to_string(),
@@ -215,6 +216,7 @@ pub async fn download_and_hash(
 	url: &str,
 	path: &Path,
 ) -> Result<String, NetworkError> {
+	debug!("Downloading file from {} to {}", url, path.display());
 	if path.parent().is_none() {
 		return Err(NetworkError::DirectoryNotExists(
 			path.to_str().unwrap().to_string(),
