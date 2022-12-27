@@ -3,6 +3,7 @@
 use std::path::Path;
 
 use reqwest::{Client, IntoUrl, RequestBuilder};
+use sha1::Digest;
 use thiserror::Error;
 use tokio::{fs, io::AsyncWriteExt};
 
@@ -63,6 +64,17 @@ impl NetClient {
 	/// See [`download_to`] for details.
 	pub async fn download_to(&self, url: &str, path: &Path) -> Result<(), NetworkError> {
 		download_to(&self.client, url, path).await
+	}
+
+	/// Downloads a file from the given URL to the given path and returns its hash.
+	///
+	/// See [`download_and_hash`] for details.
+	pub async fn download_and_hash(
+		&self,
+		url: &str,
+		path: &Path,
+	) -> Result<String, NetworkError> {
+		download_and_hash(&self.client, url, path).await
 	}
 
 	/// Gets the IPFS gateway URL for the given CID (or path).
@@ -163,6 +175,62 @@ pub async fn download_to(client: &Client, url: &str, path: &Path) -> Result<(), 
 	Ok(())
 }
 
+/// Downloads a file from the given URL to the given path and calculates its sha1 hash.
+///
+/// Function downloads a file from the given URL to the given path.
+/// If the file already exists, it will be overwritten.
+///
+/// It chunks the file to not use too much memory.
+///
+/// Hash is calculated using SHA1.
+///
+/// Use this function if you want to check if the file was downloaded correctly
+/// but you don't want to read file twice.
+///
+/// # Examples
+///
+/// ```
+/// use firesquare_launcher::utils::net::download_and_hash;
+/// use tokio::runtime::Runtime;
+/// use std::path::Path;
+///
+/// let mut rt = Runtime::new().unwrap();
+/// rt.block_on(async {
+///   let hash = download_and_hash(&reqwest::Client::new(), "https://ipfs.frsqr.xyz/ipfs/bafybeih764jjsjnf5inznxgifpzuzinhgn4565sxxqtl2vuylaawc6mzf4/hello.txt", &Path::new("hello.txt")).await.unwrap();
+///
+///   // Check that the file was downloaded
+///   assert!(Path::new("hello.txt").exists());
+///
+///   // Check that the hash is correct
+///   assert_eq!(hash, "e1b4daf52c3f457146e4d8640e4b4f8fdd759bc4");
+///
+///   // Cleanup
+///   std::fs::remove_file("hello.txt").unwrap();
+/// });
+/// ```
+///
+/// # Errors
+///
+/// - [`NetworkError::NetworkError`] if there was an error while downloading the file.
+/// - [`NetworkError::IOError`] if there was an error while writing the file.
+/// - [`NetworkError::DirectoryNotExists`] if the parent directory of the given path does not exist.
+pub async fn download_and_hash(client: &Client, url: &str, path: &Path) -> Result<String, NetworkError> {
+	if path.parent().is_none() {
+		return Err(NetworkError::DirectoryNotExists(
+			path.to_str().unwrap().to_string(),
+		));
+	}
+	let mut response = client.get(url).send().await?;
+	let mut file = fs::File::create(path).await?;
+	let mut hasher = sha1::Sha1::new();
+	while let Some(chunk) = response.chunk().await? {
+		file.write_all(&chunk).await?;
+		hasher.update(&chunk);
+	}
+	let hash = hasher.finalize();
+	Ok(hex::encode(hash))
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -178,5 +246,20 @@ mod tests {
 
 		// Cleanup
 		std::fs::remove_file("hello.txt").unwrap();
+	}
+
+	#[tokio::test]
+	async fn test_download_and_hash() {
+		let client = Client::new();
+		let hash = download_and_hash(&client, "https://ipfs.frsqr.xyz/ipfs/bafybeih764jjsjnf5inznxgifpzuzinhgn4565sxxqtl2vuylaawc6mzf4/hello.txt", Path::new("hello.txt2")).await.unwrap();
+
+		// Check that the file was downloaded
+		assert!(Path::new("hello.txt2").exists());
+
+		// Check that the hash is correct
+		assert_eq!(hash, "e1b4daf52c3f457146e4d8640e4b4f8fdd759bc4");
+
+		// Cleanup
+		std::fs::remove_file("hello.txt2").unwrap();
 	}
 }
