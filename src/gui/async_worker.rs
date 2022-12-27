@@ -21,7 +21,7 @@ use tokio::runtime::Runtime;
 /// It is detached from the main thread and can be used to run
 /// long-running tasks without blocking the UI.
 ///
-/// It's controlled by AppModel.
+/// It's controlled by [`super::app::AppModel`].
 pub struct AsyncWorkerModel {
 	shared_state: Arc<SharedState>,
 	runtime: Runtime,
