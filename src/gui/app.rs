@@ -19,6 +19,7 @@ use std::convert::identity;
 use std::sync::Arc;
 
 /// Shared application state.
+#[derive(Debug)]
 pub struct SharedState {
 	/// Network client.
 	pub net_client: NetClient,

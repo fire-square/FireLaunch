@@ -27,6 +27,7 @@ extern crate relm4;
 // extern crate tracker;
 
 pub mod gui;
+pub mod storage;
 pub mod utils;
 
 /// Name of the application.
