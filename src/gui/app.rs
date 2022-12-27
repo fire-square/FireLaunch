@@ -102,13 +102,13 @@ impl SimpleComponent for AppModel {
 					destructive_accept: true,
 					alert_type: gtk::MessageType::Info,
 				})
-				.forward(sender.input_sender(), convert_force_cofob_alert_response),
+				.forward(sender.input_sender(), convert_ignore_alert_response),
 			internet_unavailable_dialog: Alert::builder()
 				.transient_for(root)
 				.launch(AlertSettings {
 					text: String::from("Интернет недоступен"),
 					secondary_text: Some(String::from(
-						"Проверьте подключение к интернету. Приложение будет закрыто",
+						"Часть функций может работать некорректно. Пожалуйста, проверьте подключение к интернету.",
 					)),
 					confirm_label: String::from("Закрыть"),
 					cancel_label: None,
@@ -119,7 +119,7 @@ impl SimpleComponent for AppModel {
 				})
 				.forward(
 					sender.input_sender(),
-					convert_internet_unavailable_alert_response,
+					convert_ignore_alert_response,
 				),
 			async_worker: AsyncWorkerModel::builder()
 				.detach_worker(shared_state)
@@ -155,19 +155,11 @@ impl SimpleComponent for AppModel {
 	}
 }
 
-fn convert_force_cofob_alert_response(response: AlertResponse) -> AppMsg {
+fn convert_ignore_alert_response(response: AlertResponse) -> AppMsg {
 	match response {
 		AlertResponse::Confirm => AppMsg::Ignore,
 		AlertResponse::Cancel => AppMsg::Ignore,
 		AlertResponse::Option => AppMsg::Ignore,
-	}
-}
-
-fn convert_internet_unavailable_alert_response(response: AlertResponse) -> AppMsg {
-	match response {
-		AlertResponse::Confirm => AppMsg::CloseApp,
-		AlertResponse::Cancel => AppMsg::CloseApp,
-		AlertResponse::Option => AppMsg::CloseApp,
 	}
 }
 
