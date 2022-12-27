@@ -7,7 +7,7 @@
 //! For example, it can be used to assets in the background,
 //! while UI shows a progress bar.
 //!
-//! It's controlled by AppModel.
+//! It's controlled by [`super::app::AppModel`].
 
 use std::sync::Arc;
 
