@@ -7,6 +7,7 @@
 //! [`AppModel`]: app/struct.AppModel.html
 
 pub mod app;
+pub mod async_worker;
 pub mod components;
 
 pub use app::AppModel;

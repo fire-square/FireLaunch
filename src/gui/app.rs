@@ -3,6 +3,7 @@
 //! It contains the main window and all other components. It is responsible for
 //! handling all user input and launching the game.
 
+use super::async_worker::{AsyncWorkerModel, AsyncWorkerMsg};
 use super::components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use super::CSS;
 use crate::utils::net::NetClient;
@@ -12,8 +13,9 @@ use gtk::{
 };
 use relm4::{
 	gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
-	RelmWidgetExt, SimpleComponent,
+	RelmWidgetExt, SimpleComponent, WorkerController,
 };
+use std::convert::identity;
 
 /// Shared application state.
 pub struct SharedState {
@@ -25,6 +27,7 @@ pub struct SharedState {
 pub struct AppModel {
 	// state: Arc<SharedState>,
 	force_cofob_dialog: Controller<Alert>,
+	async_worker: WorkerController<AsyncWorkerModel>,
 }
 
 /// AppModel commands.
@@ -91,6 +94,9 @@ impl SimpleComponent for AppModel {
 					alert_type: gtk::MessageType::Info,
 				})
 				.forward(sender.input_sender(), convert_alert_response),
+			async_worker: AsyncWorkerModel::builder()
+				.detach_worker(())
+				.forward(sender.input_sender(), identity),
 		};
 
 		let widgets = view_output!();
@@ -102,7 +108,7 @@ impl SimpleComponent for AppModel {
 		match message {
 			AppMsg::LaunchMinecraft => {
 				info!("Launching minecraft");
-				todo!("Launch minecraft")
+				self.async_worker.emit(AsyncWorkerMsg::HelloWorld);
 			}
 			AppMsg::ForceCofob => {
 				self.force_cofob_dialog.emit(AlertMsg::Show);
