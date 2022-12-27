@@ -1,7 +1,6 @@
 //! This module contains [`Storage`] struct, which is used to verify and download
 //! static assets.
 
-use crate::gui::app::SharedState;
 use dirs::data_dir;
 use sha1::Digest;
 use std::path::PathBuf;
@@ -10,6 +9,9 @@ use tokio::io::AsyncReadExt;
 
 use thiserror::Error;
 
+use crate::utils::net::NetClient;
+
+/// Storage error.
 #[derive(Error, Debug)]
 pub enum StorageError {
 	/// IO error.
@@ -23,17 +25,18 @@ pub enum StorageError {
 	HashMismatch(String, String),
 }
 
+/// Asset storage.
 #[derive(Debug)]
 pub struct Storage {
+	client: Arc<NetClient>,
 	storage_dir: PathBuf,
-	state: Arc<SharedState>,
 }
 
 impl Storage {
 	/// Creates a new storage.
 	///
 	/// This function will create all required directories if they don't exist.
-	pub fn new(state: Arc<SharedState>, storage_dir_opt: Option<PathBuf>) -> Self {
+	pub fn new(client: Arc<NetClient>, storage_dir_opt: Option<PathBuf>) -> Self {
 		let storage_dir = match storage_dir_opt {
 			Some(dir) => dir,
 			None => data_dir().unwrap().join("FireLaunch"),
@@ -52,7 +55,10 @@ impl Storage {
 			}
 		}
 
-		Self { storage_dir, state }
+		Self {
+			storage_dir,
+			client,
+		}
 	}
 
 	/// Get asset path.
@@ -75,9 +81,8 @@ impl Storage {
 		let dest_path = self.get_asset_path(sha1_hash);
 		tokio::fs::create_dir_all(dest_path.parent().unwrap()).await?;
 		let downloaded_hash = self
-			.state
-			.net_client
-			.download_and_hash(&self.state.net_client.ipfs(path), &dest_path)
+			.client
+			.download_and_hash(&self.client.ipfs(path), &dest_path)
 			.await?;
 		if sha1_hash != downloaded_hash {
 			return Err(StorageError::HashMismatch(

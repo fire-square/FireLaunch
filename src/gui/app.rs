@@ -6,7 +6,6 @@
 use super::async_worker::{AsyncWorkerModel, AsyncWorkerMsg};
 use super::components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use super::CSS;
-use crate::utils::net::NetClient;
 use gtk::{
 	prelude::{BoxExt, ButtonExt, OrientableExt},
 	traits::GtkWindowExt,
@@ -16,19 +15,9 @@ use relm4::{
 	RelmWidgetExt, SimpleComponent, WorkerController,
 };
 use std::convert::identity;
-use std::sync::Arc;
-
-/// Shared application state.
-#[derive(Debug)]
-pub struct SharedState {
-	/// Network client.
-	pub net_client: NetClient,
-}
 
 /// AppModel state.
 pub struct AppModel {
-	#[doc(hidden)]
-	pub state: Arc<SharedState>, // make it private in the future
 	force_cofob_dialog: Controller<Alert>,
 	internet_unavailable_dialog: Controller<Alert>,
 	async_worker: WorkerController<AsyncWorkerModel>,
@@ -54,7 +43,7 @@ pub enum AppMsg {
 #[component(pub)]
 impl SimpleComponent for AppModel {
 	type Widgets = AppWidgets;
-	type Init = SharedState;
+	type Init = ();
 	type Input = AppMsg;
 	type Output = ();
 
@@ -84,13 +73,11 @@ impl SimpleComponent for AppModel {
 	}
 
 	fn init(
-		params: Self::Init,
+		_params: Self::Init,
 		root: &Self::Root,
 		sender: ComponentSender<Self>,
 	) -> ComponentParts<Self> {
-		let shared_state = Arc::new(params);
 		let model = AppModel {
-			state: shared_state.clone(),
 			force_cofob_dialog: Alert::builder()
 				.transient_for(root)
 				.launch(AlertSettings {
@@ -123,7 +110,7 @@ impl SimpleComponent for AppModel {
 					convert_ignore_alert_response,
 				),
 			async_worker: AsyncWorkerModel::builder()
-				.detach_worker(shared_state)
+				.detach_worker(())
 				.forward(sender.input_sender(), identity),
 			app_window: root.clone(),
 		};
@@ -169,11 +156,8 @@ impl AppModel {
 	///
 	/// This function is called from `main.rs`.
 	pub fn launch() {
-		let net_client = NetClient::new();
-		let state = SharedState { net_client };
-
 		let app = RelmApp::new("xyz.frsqr.launcher");
 		relm4::set_global_css(CSS);
-		app.run::<AppModel>(state);
+		app.run::<AppModel>(());
 	}
 }

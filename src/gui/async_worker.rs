@@ -11,7 +11,9 @@
 
 use std::sync::Arc;
 
-use super::app::{AppMsg, SharedState};
+use crate::{storage::Storage, utils::net::NetClient};
+
+use super::app::AppMsg;
 use relm4::{ComponentSender, Worker};
 use tokio::runtime::Runtime;
 
@@ -23,7 +25,8 @@ use tokio::runtime::Runtime;
 ///
 /// It's controlled by [`super::app::AppModel`].
 pub struct AsyncWorkerModel {
-	shared_state: Arc<SharedState>,
+	client: Arc<NetClient>,
+	storage: Arc<Storage>,
 	runtime: Runtime,
 }
 
@@ -42,9 +45,9 @@ pub enum AsyncWorkerMsg {
 
 impl AsyncWorkerModel {
 	/// Check connection to the internet.
-	async fn check_connection(state: Arc<SharedState>, sender: ComponentSender<Self>) {
+	async fn check_connection(client: Arc<NetClient>, sender: ComponentSender<Self>) {
 		info!("Checking internet connection");
-		let result = state.net_client.get("https://ipfs.frsqr.xyz/").send().await;
+		let result = client.get("https://ipfs.frsqr.xyz/").send().await;
 		if result.is_err() {
 			info!("Internet is unavailable");
 			let _ = sender.output(AppMsg::InternetUnavailable);
@@ -55,13 +58,15 @@ impl AsyncWorkerModel {
 }
 
 impl Worker for AsyncWorkerModel {
-	type Init = Arc<SharedState>;
+	type Init = ();
 	type Input = AsyncWorkerMsg;
 	type Output = AppMsg;
 
-	fn init(init: Self::Init, _sender: ComponentSender<Self>) -> Self {
+	fn init(_init: Self::Init, _sender: ComponentSender<Self>) -> Self {
+		let client = Arc::new(NetClient::new());
 		Self {
-			shared_state: init,
+			client: client.clone(),
+			storage: Arc::new(Storage::new(client, None)),
 			runtime: Runtime::new().expect("Failed to create tokio runtime"),
 		}
 	}
@@ -70,7 +75,7 @@ impl Worker for AsyncWorkerModel {
 		match msg {
 			AsyncWorkerMsg::CheckConnection => {
 				self.runtime.spawn(AsyncWorkerModel::check_connection(
-					self.shared_state.clone(),
+					self.client.clone(),
 					sender,
 				));
 			}
