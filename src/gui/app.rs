@@ -16,6 +16,7 @@ use relm4::{
 	RelmWidgetExt, SimpleComponent, WorkerController,
 };
 use std::convert::identity;
+use std::sync::Arc;
 
 /// Shared application state.
 pub struct SharedState {
@@ -25,9 +26,12 @@ pub struct SharedState {
 
 /// AppModel state.
 pub struct AppModel {
-	// state: Arc<SharedState>,
+	#[doc(hidden)]
+	pub state: Arc<SharedState>, // make it private in the future
 	force_cofob_dialog: Controller<Alert>,
+	internet_unavailable_dialog: Controller<Alert>,
 	async_worker: WorkerController<AsyncWorkerModel>,
+	app_window: gtk::ApplicationWindow,
 }
 
 /// AppModel commands.
@@ -37,6 +41,10 @@ pub enum AppMsg {
 	LaunchMinecraft,
 	/// Force cofob to work.
 	ForceCofob,
+	/// Internet is unavailable.
+	InternetUnavailable,
+	/// Close application.
+	CloseApp,
 	/// Ignore.
 	Ignore,
 }
@@ -75,12 +83,13 @@ impl SimpleComponent for AppModel {
 	}
 
 	fn init(
-		_params: Self::Init,
+		params: Self::Init,
 		root: &Self::Root,
 		sender: ComponentSender<Self>,
 	) -> ComponentParts<Self> {
+		let shared_state = Arc::new(params);
 		let model = AppModel {
-			// state: Arc::new(params),
+			state: shared_state.clone(),
 			force_cofob_dialog: Alert::builder()
 				.transient_for(root)
 				.launch(AlertSettings {
@@ -93,11 +102,32 @@ impl SimpleComponent for AppModel {
 					destructive_accept: true,
 					alert_type: gtk::MessageType::Info,
 				})
-				.forward(sender.input_sender(), convert_alert_response),
+				.forward(sender.input_sender(), convert_force_cofob_alert_response),
+			internet_unavailable_dialog: Alert::builder()
+				.transient_for(root)
+				.launch(AlertSettings {
+					text: String::from("Интернет недоступен"),
+					secondary_text: Some(String::from(
+						"Проверьте подключение к интернету. Приложение будет закрыто",
+					)),
+					confirm_label: String::from("Закрыть"),
+					cancel_label: None,
+					option_label: None,
+					is_modal: true,
+					destructive_accept: true,
+					alert_type: gtk::MessageType::Error,
+				})
+				.forward(
+					sender.input_sender(),
+					convert_internet_unavailable_alert_response,
+				),
 			async_worker: AsyncWorkerModel::builder()
-				.detach_worker(())
+				.detach_worker(shared_state)
 				.forward(sender.input_sender(), identity),
+			app_window: root.clone(),
 		};
+
+		model.async_worker.emit(AsyncWorkerMsg::CheckConnection);
 
 		let widgets = view_output!();
 
@@ -113,16 +143,31 @@ impl SimpleComponent for AppModel {
 			AppMsg::ForceCofob => {
 				self.force_cofob_dialog.emit(AlertMsg::Show);
 			}
+			AppMsg::InternetUnavailable => {
+				self.internet_unavailable_dialog.emit(AlertMsg::Show);
+			}
+			AppMsg::CloseApp => {
+				info!("Closing app");
+				self.app_window.close();
+			}
 			AppMsg::Ignore => {}
 		}
 	}
 }
 
-fn convert_alert_response(response: AlertResponse) -> AppMsg {
+fn convert_force_cofob_alert_response(response: AlertResponse) -> AppMsg {
 	match response {
 		AlertResponse::Confirm => AppMsg::Ignore,
 		AlertResponse::Cancel => AppMsg::Ignore,
 		AlertResponse::Option => AppMsg::Ignore,
+	}
+}
+
+fn convert_internet_unavailable_alert_response(response: AlertResponse) -> AppMsg {
+	match response {
+		AlertResponse::Confirm => AppMsg::CloseApp,
+		AlertResponse::Cancel => AppMsg::CloseApp,
+		AlertResponse::Option => AppMsg::CloseApp,
 	}
 }
 
