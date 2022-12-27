@@ -78,7 +78,7 @@ impl NetClient {
 	/// assert_eq!("https://ipfs.frsqr.xyz/ipfs/CID", client.ipfs("CID"));
 	/// ```
 	pub fn ipfs(&self, cid: &str) -> String {
-		format!("{}/{cid}", self.ipfs_gateway)
+		format!("{}{cid}", self.ipfs_gateway)
 	}
 
 	/// Proxy for [`reqwest::Client::get`].
