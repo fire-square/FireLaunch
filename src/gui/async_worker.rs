@@ -44,7 +44,7 @@ impl AsyncWorkerModel {
 	/// Check connection to the internet.
 	async fn check_connection(state: Arc<SharedState>, sender: ComponentSender<Self>) {
 		info!("Checking internet connection");
-		let result = state.net_client.get("https://google.com").send().await;
+		let result = state.net_client.get("https://ipfs.frsqr.xyz/").send().await;
 		if result.is_err() {
 			info!("Internet is unavailable");
 			let _ = sender.output(AppMsg::InternetUnavailable);
