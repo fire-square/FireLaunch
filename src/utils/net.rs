@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use reqwest::Client;
+use reqwest::{Client, IntoUrl, RequestBuilder};
 use thiserror::Error;
 use tokio::{fs, io::AsyncWriteExt};
 
@@ -50,6 +50,36 @@ impl NetClient {
 	/// See [`download_to`] for details.
 	pub async fn download_to(&self, url: &str, path: &Path) -> Result<(), NetworkError> {
 		download_to(&self.client, url, path).await
+	}
+
+	/// Proxy for [`reqwest::Client::get`].
+	pub fn get<U: IntoUrl>(&self, url: U) -> RequestBuilder {
+		self.client.get(url)
+	}
+
+	/// Proxy for [`reqwest::Client::post`].
+	pub fn post<U: IntoUrl>(&self, url: U) -> RequestBuilder {
+		self.client.post(url)
+	}
+
+	/// Proxy for [`reqwest::Client::put`].
+	pub fn put<U: IntoUrl>(&self, url: U) -> RequestBuilder {
+		self.client.put(url)
+	}
+
+	/// Proxy for [`reqwest::Client::delete`].
+	pub fn delete<U: IntoUrl>(&self, url: U) -> RequestBuilder {
+		self.client.delete(url)
+	}
+
+	/// Proxy for [`reqwest::Client::head`].
+	pub fn head<U: IntoUrl>(&self, url: U) -> RequestBuilder {
+		self.client.head(url)
+	}
+
+	/// Proxy for [`reqwest::Client::patch`].
+	pub fn patch<U: IntoUrl>(&self, url: U) -> RequestBuilder {
+		self.client.patch(url)
 	}
 }
 
