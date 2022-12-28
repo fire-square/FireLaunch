@@ -117,7 +117,7 @@ impl AsyncWorkerModel {
 			// Add task to the set
 			set.push(tokio::spawn(async move {
 				let mut retries = 0;
-				while let Err(e) = asset.download_if_invalid(&cloned_storage).await {
+				while let Err(e) = asset.download_if_not_exists(&cloned_storage).await {
 					retries += 1;
 					if retries > 10 {
 						error!("Failed to download {} asset. Error: {e}", asset.hash);
