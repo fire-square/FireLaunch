@@ -6,5 +6,6 @@
 pub mod crypto;
 pub mod log;
 pub mod net;
+pub mod parallel;
 
 pub use self::log::init_logging;
