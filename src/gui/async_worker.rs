@@ -13,6 +13,7 @@ use std::sync::Arc;
 use tokio::task::JoinHandle;
 
 use crate::structures::asset_index::{AssetIndex, AssetIndexError};
+use crate::utils::parallel::Parallelise;
 use crate::{storage::Storage, utils::net::NetClient};
 
 use super::app::AppMsg;
@@ -79,7 +80,7 @@ impl AsyncWorkerModel {
 		// Save asset index to object storage
 		index.save(&storage, &hash).await?;
 
-		let max_tasks = num_cpus::get() * 2;
+		let mut parallel = Parallelise::default();
 
 		// Get total length of assets (for progress bar)
 		let length = index.objects.len() as f64;
@@ -91,46 +92,26 @@ impl AsyncWorkerModel {
 		))));
 		let _ = sender.output(AppMsg::ShowProgressBar);
 
-		// Create a set of tasks. This is used to limit the parallel tasks.
-		let mut set: Vec<JoinHandle<()>> = Vec::with_capacity(max_tasks);
 		// Iterate over assets
 		for (i, asset) in index.get_assets().enumerate() {
-			loop {
-				// If set have less than max_tasks, add new task
-				if set.len() < max_tasks {
-					break;
-				}
-				// Else, wait for one of the tasks to finish
-				for (j, task) in set.iter_mut().enumerate() {
-					if task.is_finished() {
-						// And remove it from the set
-						set.remove(j);
-						break;
-					}
-				}
-				// Check set again
-				if set.len() < max_tasks {
-					break;
-				}
-				// Sleep for 5ms to avoid busy waiting
-				tokio::time::sleep(std::time::Duration::from_millis(5)).await;
-			}
-
 			// Spawn new task
 			let cloned_storage = storage.clone();
 			// Add task to the set
-			set.push(tokio::spawn(async move {
-				let mut retries = 0;
-				while let Err(e) = asset.download_if_invalid(&cloned_storage).await {
-					retries += 1;
-					if retries > 10 {
-						error!("Failed to download {} asset. Error: {e}", asset.hash);
-						break;
+			parallel
+				.push(tokio::spawn(async move {
+					info!("Downloading {} asset", asset.hash);
+					let mut retries = 0;
+					while let Err(e) = asset.download_if_invalid(&cloned_storage).await {
+						retries += 1;
+						if retries > 10 {
+							error!("Failed to download {} asset. Error: {e}", asset.hash);
+							break;
+						}
+						debug!("Failed to download {} asset, retrying in 10ms. Retry: {retries}. Error: {e}", asset.hash);
+						tokio::time::sleep(std::time::Duration::from_millis(10)).await;
 					}
-					debug!("Failed to download {} asset, retrying in 10ms. Retry: {retries}. Error: {e}", asset.hash);
-					tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-				}
-			}));
+				}))
+				.await;
 
 			// Send progress bar updates every 20 assets (to avoid spamming the UI)
 			if i % 20 == 0 {
@@ -147,9 +128,7 @@ impl AsyncWorkerModel {
 		}
 
 		// Wait for all tasks to finish
-		for task in set {
-			task.await.expect("Failed to join task");
-		}
+		parallel.wait().await;
 
 		// Hide progress bar
 		let _ = sender.output(AppMsg::HideProgressBar);
