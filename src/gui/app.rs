@@ -6,10 +6,7 @@
 use super::async_worker::{AsyncWorkerModel, AsyncWorkerMsg};
 use super::components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use super::CSS;
-use gtk::{
-	prelude::{BoxExt, ButtonExt, OrientableExt},
-	traits::GtkWindowExt,
-};
+use gtk::{prelude::*, traits::GtkWindowExt};
 use relm4::{
 	gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
 	RelmWidgetExt, SimpleComponent, WorkerController,
@@ -22,6 +19,7 @@ pub struct AppModel {
 	internet_unavailable_dialog: Controller<Alert>,
 	async_worker: WorkerController<AsyncWorkerModel>,
 	app_window: gtk::ApplicationWindow,
+	progress_bar: gtk::ProgressBar,
 }
 
 /// AppModel commands.
@@ -29,6 +27,10 @@ pub struct AppModel {
 pub enum AppMsg {
 	/// Launch minecraft.
 	LaunchMinecraft,
+	/// Set progress bar fraction.
+	SetProgressBarFraction(f64),
+	/// Hide progress bar.
+	HideProgressBar,
 	/// Force cofob to work.
 	ForceCofob,
 	/// Internet is unavailable.
@@ -68,6 +70,11 @@ impl SimpleComponent for AppModel {
 						sender.input(AppMsg::ForceCofob)
 					}
 				},
+				#[name = "progress_bar"]
+				append = &gtk::ProgressBar {
+					set_fraction: 0.0,
+					set_show_text: true,
+				},
 			}
 		}
 	}
@@ -77,6 +84,8 @@ impl SimpleComponent for AppModel {
 		root: &Self::Root,
 		sender: ComponentSender<Self>,
 	) -> ComponentParts<Self> {
+		let widgets = view_output!();
+
 		let model = AppModel {
 			force_cofob_dialog: Alert::builder()
 				.transient_for(root)
@@ -113,11 +122,12 @@ impl SimpleComponent for AppModel {
 				.detach_worker(())
 				.forward(sender.input_sender(), identity),
 			app_window: root.clone(),
+			progress_bar: widgets.progress_bar.clone(),
 		};
 
 		model.async_worker.emit(AsyncWorkerMsg::CheckConnection);
 
-		let widgets = view_output!();
+		widgets.progress_bar.hide();
 
 		ComponentParts { model, widgets }
 	}
@@ -126,7 +136,16 @@ impl SimpleComponent for AppModel {
 		match message {
 			AppMsg::LaunchMinecraft => {
 				info!("Launching minecraft");
-				self.async_worker.emit(AsyncWorkerMsg::HelloWorld);
+				self.progress_bar.set_text(Some("Загрузка ассетов"));
+				self.progress_bar.show();
+				self.async_worker.emit(AsyncWorkerMsg::DownloadAssets);
+			}
+			AppMsg::SetProgressBarFraction(fraction) => {
+				self.progress_bar.set_fraction(fraction);
+			}
+			AppMsg::HideProgressBar => {
+				self.progress_bar.set_fraction(0.0);
+				self.progress_bar.hide();
 			}
 			AppMsg::ForceCofob => {
 				self.force_cofob_dialog.emit(AlertMsg::Show);

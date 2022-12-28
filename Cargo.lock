@@ -395,6 +395,7 @@ dependencies = [
  "hex",
  "log",
  "log-panics",
+ "num_cpus",
  "rand",
  "relm4",
  "relm4-components",

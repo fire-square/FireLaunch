@@ -113,6 +113,7 @@ impl Storage {
 	) -> Result<PathBuf, StorageError> {
 		let dest_path = self.get_asset_path(sha1_hash);
 		if !dest_path.exists() {
+			debug!("Asset doesn't exist, downloading: {}", sha1_hash);
 			self.download_asset(sha1_hash, path).await?;
 		}
 		Ok(dest_path)

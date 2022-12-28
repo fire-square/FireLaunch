@@ -10,6 +10,7 @@
 //! It's controlled by [`super::app::AppModel`].
 
 use std::sync::Arc;
+use tokio::task::JoinHandle;
 
 use crate::structures::asset_index::{AssetIndex, AssetIndexError};
 use crate::{storage::Storage, utils::net::NetClient};
@@ -38,6 +39,10 @@ pub enum AsyncWorkerMsg {
 	///
 	/// Sends [`AppMsg::InternetUnavailable`] if connection is not available.
 	CheckConnection,
+	/// Download assets.
+	///
+	/// Sends [`AppMsg::SetProgressBarFraction`] and [`AppMsg::HideProgressBar`]
+	DownloadAssets,
 	/// Hello world command. Used for testing.
 	///
 	/// Sleeps for 1 second and then prints "Hello world from async worker".
@@ -58,7 +63,11 @@ impl AsyncWorkerModel {
 	}
 
 	/// Download assets.
-	async fn download_assets(storage: Arc<Storage>) -> Result<(), AssetIndexError> {
+	async fn download_assets(
+		sender: ComponentSender<Self>,
+		storage: Arc<Storage>,
+	) -> Result<(), AssetIndexError> {
+		// Download asset index
 		let hash = "0b32008ac3174dae0df463fc31f693b55c6deefc".to_string();
 		let index = AssetIndex::download(
 			&storage,
@@ -66,8 +75,67 @@ impl AsyncWorkerModel {
 			"bafkreifpqxcl7lfwhpalqlxd7g4i5wpxtgu6ljxlapdistgm422qt2s3wa",
 		)
 		.await?;
+		// Save asset index to object storage
 		index.save(&storage, &hash).await?;
-		index.download_all(&storage).await?;
+
+		let max_tasks = num_cpus::get();
+
+		// Get total length of assets (for progress bar)
+		let length = index.objects.len() as u64;
+		// Create a set of tasks. This is used to limit the parallel tasks.
+		let mut set: Vec<JoinHandle<()>> = Vec::with_capacity(max_tasks);
+		// Iterate over assets
+		for (i, asset) in index.get_assets().enumerate() {
+			loop {
+				// If set have less than max_tasks, add new task
+				if set.len() < max_tasks {
+					break;
+				}
+				// Else, wait for one of the tasks to finish
+				for (j, task) in set.iter_mut().enumerate() {
+					if task.is_finished() {
+						// And remove it from the set
+						set.remove(j);
+						break;
+					}
+				}
+				// Check set again
+				if set.len() < max_tasks {
+					break;
+				}
+				// Sleep for 5ms to avoid busy waiting
+				tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+			}
+
+			// Update progress bar
+			let fraction = (i as f64) / (length as f64);
+			let _ = sender.output(AppMsg::SetProgressBarFraction(fraction));
+
+			// Spawn new task
+			let cloned_storage = storage.clone();
+			// Add task to the set
+			set.push(tokio::spawn(async move {
+				let mut retries = 0;
+				while let Err(e) = asset.download_if_invalid(&cloned_storage).await {
+					retries += 1;
+					if retries > 10 {
+						error!("Failed to download {} asset. Error: {e}", asset.hash);
+						break;
+					}
+					debug!("Failed to download {} asset, retrying in 10ms. Retry: {retries}. Error: {e}", asset.hash);
+					tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+				}
+			}));
+		}
+
+		// Wait for all tasks to finish
+		for task in set {
+			task.await.expect("Failed to join task");
+		}
+
+		// Hide progress bar
+		let _ = sender.output(AppMsg::HideProgressBar);
+
 		Ok(())
 	}
 }
@@ -94,9 +162,17 @@ impl Worker for AsyncWorkerModel {
 					sender,
 				));
 			}
+			AsyncWorkerMsg::DownloadAssets => {
+				self.runtime.spawn(AsyncWorkerModel::download_assets(
+					sender,
+					self.storage.clone(),
+				));
+			}
 			AsyncWorkerMsg::HelloWorld => {
-				self.runtime
-					.spawn(AsyncWorkerModel::download_assets(self.storage.clone()));
+				self.runtime.spawn(async move {
+					tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+					println!("Hello world from async worker");
+				});
 			}
 		}
 	}
