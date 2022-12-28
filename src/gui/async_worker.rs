@@ -69,7 +69,7 @@ impl AsyncWorkerModel {
 	) -> Result<(), AssetIndexError> {
 		// Download asset index
 		let hash = "0b32008ac3174dae0df463fc31f693b55c6deefc".to_string();
-		let index = AssetIndex::download(
+		let index = AssetIndex::download_if_invalid(
 			&storage,
 			&hash,
 			"bafkreifpqxcl7lfwhpalqlxd7g4i5wpxtgu6ljxlapdistgm422qt2s3wa",
