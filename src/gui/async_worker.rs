@@ -79,7 +79,7 @@ impl AsyncWorkerModel {
 		// Save asset index to object storage
 		index.save(&storage, &hash).await?;
 
-		let max_tasks = num_cpus::get();
+		let max_tasks = num_cpus::get() * 2;
 
 		// Get total length of assets (for progress bar)
 		let length = index.objects.len() as u64;
