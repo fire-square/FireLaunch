@@ -99,7 +99,6 @@ impl AsyncWorkerModel {
 			// Add task to the set
 			parallel
 				.push(tokio::spawn(async move {
-					info!("Downloading {} asset", asset.hash);
 					let mut retries = 0;
 					while let Err(e) = asset.download_if_invalid(&cloned_storage).await {
 						retries += 1;
