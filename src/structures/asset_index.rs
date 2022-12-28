@@ -76,7 +76,7 @@ impl AssetIndex {
 
 	/// Save the asset index to a file.
 	pub async fn save(&self, storage: &Storage, hash: &str) -> Result<(), AssetIndexError> {
-		let path = storage.get_asset_path(hash);
+		let path = storage.get_index_path(hash);
 		let contents = serde_json::to_string(&self)?;
 		tokio::fs::write(path, contents).await?;
 		Ok(())
