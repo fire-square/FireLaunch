@@ -30,6 +30,7 @@ pub struct AsyncWorkerModel {
 	client: Arc<NetClient>,
 	storage: Arc<Storage>,
 	runtime: Runtime,
+	download_assets_handle: Option<JoinHandle<Result<(), AssetIndexError>>>,
 }
 
 /// Async worker commands.
@@ -151,6 +152,7 @@ impl Worker for AsyncWorkerModel {
 			client: client.clone(),
 			storage: Arc::new(Storage::new(client, None)),
 			runtime: Runtime::new().expect("Failed to create tokio runtime"),
+			download_assets_handle: None,
 		}
 	}
 
@@ -163,10 +165,22 @@ impl Worker for AsyncWorkerModel {
 				));
 			}
 			AsyncWorkerMsg::DownloadAssets => {
-				self.runtime.spawn(AsyncWorkerModel::download_assets(
-					sender,
-					self.storage.clone(),
-				));
+				match &self.download_assets_handle {
+					Some(handle) => {
+						if handle.is_finished() {
+							self.download_assets_handle = None;
+						} else {
+							warn!("Download assets task is already running");
+							return;
+						}
+					}
+					None => {}
+				}
+				if self.download_assets_handle.is_none() {
+					self.download_assets_handle = Some(self.runtime.spawn(
+						AsyncWorkerModel::download_assets(sender, self.storage.clone()),
+					));
+				}
 			}
 			AsyncWorkerMsg::HelloWorld => {
 				self.runtime.spawn(async move {
