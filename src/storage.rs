@@ -43,9 +43,8 @@ impl Storage {
 		};
 
 		// Create directories if they don't exist
-		let create_dirs: [PathBuf; 4] = [
-			storage_dir.clone(),
-			storage_dir.join("assets"),
+		let create_dirs: [PathBuf; 3] = [
+			storage_dir.join("objects"),
 			storage_dir.join("indexes"),
 			storage_dir.join("libraries"),
 		];
@@ -64,7 +63,7 @@ impl Storage {
 	/// Get asset path.
 	pub fn get_asset_path(&self, sha1_hash: &str) -> PathBuf {
 		self.storage_dir
-			.join("assets")
+			.join("objects")
 			.join(&sha1_hash[0..2])
 			.join(sha1_hash)
 	}
