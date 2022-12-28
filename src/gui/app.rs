@@ -29,8 +29,12 @@ pub enum AppMsg {
 	LaunchMinecraft,
 	/// Set progress bar fraction.
 	SetProgressBarFraction(f64),
+	/// Set progress bar text.
+	SetProgressBarText(Option<String>),
 	/// Hide progress bar.
 	HideProgressBar,
+	/// Show progress bar.
+	ShowProgressBar,
 	/// Force cofob to work.
 	ForceCofob,
 	/// Internet is unavailable.
@@ -136,16 +140,28 @@ impl SimpleComponent for AppModel {
 		match message {
 			AppMsg::LaunchMinecraft => {
 				info!("Launching minecraft");
-				self.progress_bar.set_text(Some("Загрузка ассетов"));
-				self.progress_bar.show();
 				self.async_worker.emit(AsyncWorkerMsg::DownloadAssets);
 			}
 			AppMsg::SetProgressBarFraction(fraction) => {
 				self.progress_bar.set_fraction(fraction);
 			}
+			AppMsg::SetProgressBarText(text) => match text {
+				Some(text) => {
+					self.progress_bar.set_text(Some(&text));
+					self.progress_bar.set_show_text(true);
+				}
+				None => {
+					self.progress_bar.set_text(None);
+					self.progress_bar.set_show_text(false);
+				}
+			},
 			AppMsg::HideProgressBar => {
 				self.progress_bar.set_fraction(0.0);
 				self.progress_bar.hide();
+			}
+			AppMsg::ShowProgressBar => {
+				self.progress_bar.set_fraction(0.0);
+				self.progress_bar.show();
 			}
 			AppMsg::ForceCofob => {
 				self.force_cofob_dialog.emit(AlertMsg::Show);

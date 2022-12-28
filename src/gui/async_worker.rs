@@ -82,7 +82,15 @@ impl AsyncWorkerModel {
 		let max_tasks = num_cpus::get() * 2;
 
 		// Get total length of assets (for progress bar)
-		let length = index.objects.len() as u64;
+		let length = index.objects.len() as f64;
+
+		// Show progress bar
+		let _ = sender.output(AppMsg::SetProgressBarText(Some(format!(
+			"Downloading assets (0/{})",
+			length as u64
+		))));
+		let _ = sender.output(AppMsg::ShowProgressBar);
+
 		// Create a set of tasks. This is used to limit the parallel tasks.
 		let mut set: Vec<JoinHandle<()>> = Vec::with_capacity(max_tasks);
 		// Iterate over assets
@@ -108,16 +116,12 @@ impl AsyncWorkerModel {
 				tokio::time::sleep(std::time::Duration::from_millis(5)).await;
 			}
 
-			// Update progress bar
-			let fraction = (i as f64) / (length as f64);
-			let _ = sender.output(AppMsg::SetProgressBarFraction(fraction));
-
 			// Spawn new task
 			let cloned_storage = storage.clone();
 			// Add task to the set
 			set.push(tokio::spawn(async move {
 				let mut retries = 0;
-				while let Err(e) = asset.download_if_not_exists(&cloned_storage).await {
+				while let Err(e) = asset.download_if_invalid(&cloned_storage).await {
 					retries += 1;
 					if retries > 10 {
 						error!("Failed to download {} asset. Error: {e}", asset.hash);
@@ -127,6 +131,19 @@ impl AsyncWorkerModel {
 					tokio::time::sleep(std::time::Duration::from_millis(10)).await;
 				}
 			}));
+
+			// Send progress bar updates every 20 assets (to avoid spamming the UI)
+			if i % 20 == 0 {
+				// Update progress bar text
+				let _ = sender.output(AppMsg::SetProgressBarText(Some(format!(
+					"Downloading assets ({i}/{})",
+					length as u64
+				))));
+
+				// Update progress bar
+				let fraction = (i as f64) / length;
+				let _ = sender.output(AppMsg::SetProgressBarFraction(fraction));
+			}
 		}
 
 		// Wait for all tasks to finish

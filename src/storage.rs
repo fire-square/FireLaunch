@@ -135,7 +135,6 @@ impl Storage {
 			self.download_asset(sha1_hash, path).await?;
 			return Ok(dest_path);
 		}
-		debug!("Asset is valid, skipping download: {}", sha1_hash);
 		Ok(dest_path)
 	}
 
