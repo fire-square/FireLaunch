@@ -149,6 +149,11 @@ fn get_os_name() -> String {
 	{
 		"linux".to_string()
 	}
+	// Raise compile error if the OS is not supported.
+	#[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+	{
+		compile_error!("Unsupported OS");
+	}
 }
 
 impl Rule {
