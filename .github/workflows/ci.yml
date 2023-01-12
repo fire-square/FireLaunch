@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: apt-get update && apt-get install $PACKAGES
+      - run: sudo apt-get update && sudo apt-get install $PACKAGES
       - uses: sfackler/actions/rustup@master
       - run: echo "::set-output name=version::$(rustc --version)"
         id: rust-version
@@ -81,7 +81,7 @@ jobs:
       - run: echo "::set-output name=version::$(rustc --version)"
         id: rust-version
       - run: rustup target add x86_64-unknown-linux-gnu
-      - run: apt-get update && apt-get install $PACKAGES
+      - run: sudo apt-get update && sudo apt-get install $PACKAGES
       - uses: Swatinem/rust-cache@v2
         with:
           key: "linux"
