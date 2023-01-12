@@ -6,6 +6,9 @@
 ///
 /// It uses `info` as default log level.
 pub fn init_logging() {
+	#[cfg(debug_assertions)]
+	env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
+	#[cfg(not(debug_assertions))]
 	env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 	log_panics::init();
 }
