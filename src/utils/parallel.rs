@@ -105,7 +105,7 @@ impl<T> Parallelise<T> {
 	}
 }
 
-impl Default for Parallelise<()> {
+impl<T> Default for Parallelise<T> {
 	fn default() -> Self {
 		Self::new(None)
 	}
