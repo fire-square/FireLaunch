@@ -21,7 +21,7 @@ use tokio::task::JoinHandle;
 /// let rt = Runtime::new().unwrap();
 /// rt.block_on(async {
 ///   // Limit to 10 concurrent tasks
-///   let mut parallel = Parallelise::new(Some(10));
+///   let mut parallel = Parallelise::with_capacity(10);
 ///   for i in 0..20 {
 ///     parallel.push(tokio::spawn(async move {
 ///       println!("Task {} started", i);
@@ -41,16 +41,30 @@ pub struct Parallelise<T> {
 impl<T> Parallelise<T> {
 	/// Create a new Parallelise struct.
 	///
+	/// The default capacity is 256.
+	#[inline]
+	pub fn new() -> Self {
+		Self::default()
+	}
+
+	/// Create a new Parallelise struct.
+	///
 	/// # Arguments
 	///
-	/// * `max_tasks` - The maximum number of concurrent tasks. If None, the
-	/// number of CPUs will be used.
-	pub fn new(max_tasks: Option<usize>) -> Self {
-		let max_tasks = max_tasks.unwrap_or(num_cpus::get() * 2);
+	/// * `capacity` - Maximum number of concurrent tasks.
+	pub fn with_capacity(capacity: usize) -> Self {
 		Self {
-			tasks: Vec::with_capacity(max_tasks),
-			max_tasks,
+			tasks: Vec::with_capacity(capacity),
+			max_tasks: capacity,
 		}
+	}
+
+	/// Create a new Parallelise struct.
+	///
+	/// The maximum number of concurrent tasks is the doubled number of CPUs.
+	#[inline]
+	pub fn with_cpus() -> Self {
+		Self::with_capacity(num_cpus::get() * 2)
 	}
 
 	/// Push a new task to the set.
@@ -107,7 +121,7 @@ impl<T> Parallelise<T> {
 
 impl<T> Default for Parallelise<T> {
 	fn default() -> Self {
-		Self::new(None)
+		Self::with_capacity(256)
 	}
 }
 
@@ -117,7 +131,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_parallelise() {
-		let mut parallel = Parallelise::new(Some(10));
+		let mut parallel = Parallelise::with_capacity(10);
 		for _ in 0..100 {
 			parallel.push(tokio::spawn(async move {})).await;
 		}
