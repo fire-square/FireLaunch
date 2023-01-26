@@ -55,6 +55,7 @@ impl NetClient {
 	}
 
 	/// Returns a reference to the underlying [`reqwest::Client`].
+	#[inline]
 	pub fn client(&self) -> &Client {
 		&self.client
 	}
@@ -62,6 +63,7 @@ impl NetClient {
 	/// Downloads a file from the given URL to the given path.
 	///
 	/// See [`download_to`] for details.
+	#[inline]
 	pub async fn download_to(&self, url: &str, path: &Path) -> Result<(), NetworkError> {
 		download_to(&self.client, url, path).await
 	}
@@ -69,6 +71,7 @@ impl NetClient {
 	/// Downloads a file from the given URL to the given path and returns its hash.
 	///
 	/// See [`download_and_hash`] for details.
+	#[inline]
 	pub async fn download_and_hash(&self, url: &str, path: &Path) -> Result<String, NetworkError> {
 		download_and_hash(&self.client, url, path).await
 	}
@@ -90,31 +93,37 @@ impl NetClient {
 	}
 
 	/// Proxy for [`reqwest::Client::get`].
+	#[inline]
 	pub fn get<U: IntoUrl>(&self, url: U) -> RequestBuilder {
 		self.client.get(url)
 	}
 
 	/// Proxy for [`reqwest::Client::post`].
+	#[inline]
 	pub fn post<U: IntoUrl>(&self, url: U) -> RequestBuilder {
 		self.client.post(url)
 	}
 
 	/// Proxy for [`reqwest::Client::put`].
+	#[inline]
 	pub fn put<U: IntoUrl>(&self, url: U) -> RequestBuilder {
 		self.client.put(url)
 	}
 
 	/// Proxy for [`reqwest::Client::delete`].
+	#[inline]
 	pub fn delete<U: IntoUrl>(&self, url: U) -> RequestBuilder {
 		self.client.delete(url)
 	}
 
 	/// Proxy for [`reqwest::Client::head`].
+	#[inline]
 	pub fn head<U: IntoUrl>(&self, url: U) -> RequestBuilder {
 		self.client.head(url)
 	}
 
 	/// Proxy for [`reqwest::Client::patch`].
+	#[inline]
 	pub fn patch<U: IntoUrl>(&self, url: U) -> RequestBuilder {
 		self.client.patch(url)
 	}
