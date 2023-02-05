@@ -9,17 +9,19 @@
 //!
 //! It's controlled by [`super::app::AppModel`].
 
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+
 use std::time::{Duration, Instant};
-use tokio::task::JoinHandle;
 
 use crate::structures::asset_index::{AssetIndex, AssetIndexError};
-use crate::utils::parallel::Parallelise;
 use crate::{storage::Storage, utils::net::NetClient};
 
 use super::app::AppMsg;
 use relm4::{ComponentSender, Worker};
 use tokio::runtime::Runtime;
+use tokio::task::JoinHandle;
+use tokio::task::JoinSet;
 
 /// Async worker model.
 ///
@@ -81,8 +83,6 @@ impl AsyncWorkerModel {
 		// Save asset index to object storage
 		index.save(&storage, &hash).await?;
 
-		let mut parallel = Parallelise::default();
-
 		// Get total length of assets (for progress bar)
 		let length = index.objects.len() as f64;
 
@@ -93,48 +93,62 @@ impl AsyncWorkerModel {
 		))));
 		let _ = sender.output(AppMsg::ShowProgressBar);
 
+		let mut download_tasks = JoinSet::<()>::new();
+
 		let mut last_bar_update = Instant::now();
 		let download_started = Instant::now();
 
-		// Iterate over assets
-		for (i, asset) in index.get_assets().enumerate() {
-			// Spawn new task
-			let cloned_storage = storage.clone();
-			// Add task to the set
-			parallel
-				.push(tokio::spawn(async move {
-					let mut retries = 0;
-					while let Err(e) = asset.download_if_invalid(&cloned_storage).await {
-						retries += 1;
-						if retries > 10 {
-							error!("Failed to download {} asset. Error: {e}", asset.hash);
-							break;
-						}
-						debug!("Failed to download {} asset, retrying in 10ms. Retry: {retries}. Error: {e}", asset.hash);
-						tokio::time::sleep(Duration::from_millis(10)).await;
-					}
-				}))
-				.await;
+		let downloaded_assets_count = Arc::new(AtomicUsize::new(0));
 
-			// Send progress bar updates at most every 10 millis (to avoid spamming the UI)
+		let mut try_update_bar = || {
 			if last_bar_update.elapsed() > Duration::from_millis(10) {
 				// Update progress bar text
 				let _ = sender.output(AppMsg::SetProgressBarText(Some(format!(
-					"Downloading assets ({i}/{})",
+					"Downloaded asset ({}/{})",
+					downloaded_assets_count.load(Ordering::SeqCst),
 					length as u64
 				))));
 
 				// Update progress bar
-				let fraction = (i as f64) / length;
+				let fraction = (downloaded_assets_count.load(Ordering::SeqCst) as f64) / length;
 				let _ = sender.output(AppMsg::SetProgressBarFraction(fraction));
 
 				// Renew last update time
 				last_bar_update = Instant::now();
 			}
+		};
+
+		// Iterate over assets
+		for asset in index.get_assets() {
+			// Spawn new task
+			let cloned_storage = storage.clone();
+			let cloned_downloaded_assets = downloaded_assets_count.clone();
+			// If there is alredy a lot of tasks, wait one for completing
+			if download_tasks.len() >= 256 {
+				download_tasks.join_next().await.unwrap().unwrap();
+			}
+			download_tasks.spawn(async move {
+				let mut retries = 0;
+				while let Err(e) = asset.download_if_invalid(&cloned_storage).await {
+					retries += 1;
+					if retries > 10 {
+						error!("Failed to download {} asset. Error: {e}", asset.hash);
+						break;
+					}
+					debug!("Failed to download {} asset, retrying in 10ms. Retry: {retries}. Error: {e}", asset.hash);
+					tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+				}
+				cloned_downloaded_assets.fetch_add(1, Ordering::SeqCst);
+			});
+
+			try_update_bar();
 		}
 
 		// Wait for all tasks to finish
-		parallel.wait().await;
+		while let Some(res) = download_tasks.join_next().await {
+			res.unwrap();
+			try_update_bar();
+		}
 
 		info!(
 			"Assets downloaded in {}",
