@@ -149,7 +149,7 @@ impl Storage {
 		}
 		let mut hasher = sha1::Sha1::new();
 		let mut reader = tokio::fs::File::open(&dest_path).await?;
-		let mut buffer = [0; 1024];
+		let mut buffer = [0; 32768];
 		loop {
 			let n = reader.read(&mut buffer).await?;
 			if n == 0 {
