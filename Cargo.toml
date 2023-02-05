@@ -50,6 +50,9 @@ num_cpus = "^1.15" # cpu count
 
 [build-dependencies]
 embed-resource = "1.8" # embed assets into binary (windows)
+anyhow = "^1.0" # error handling
+vergen = "^7" # get build info
+
 
 [profile.release]
 overflow-checks = true
