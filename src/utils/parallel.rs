@@ -16,7 +16,7 @@ use tokio::task::JoinHandle;
 ///
 /// ```
 /// use tokio::runtime::Runtime;
-/// use firesquare_launcher::utils::parallel::Parallelise;
+/// use firelaunch::utils::parallel::Parallelise;
 ///
 /// let rt = Runtime::new().unwrap();
 /// rt.block_on(async {

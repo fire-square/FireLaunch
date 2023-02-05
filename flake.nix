@@ -51,7 +51,7 @@
           '';
 
           installPhase = ''
-            install -Dm775 ./target/release/firesquare-launcher $out/bin/firelaunch
+            install -Dm775 ./target/release/firelaunch $out/bin/firelaunch
           '';
         };
       in
