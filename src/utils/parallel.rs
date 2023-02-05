@@ -103,6 +103,7 @@ impl<T> Parallelise<T> {
 		for task in self.tasks.iter_mut() {
 			let _ = task.await.unwrap();
 		}
+		self.tasks.clear();
 	}
 }
 
