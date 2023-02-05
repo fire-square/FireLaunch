@@ -124,7 +124,7 @@ impl AsyncWorkerModel {
 			let cloned_storage = storage.clone();
 			let cloned_downloaded_assets = downloaded_assets_count.clone();
 			// If there is alredy a lot of tasks, wait one for completing
-			if download_tasks.len() >= 256 {
+			if download_tasks.len() >= num_cpus::get() {
 				download_tasks.join_next().await.unwrap().unwrap();
 			}
 			download_tasks.spawn(async move {
