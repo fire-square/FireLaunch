@@ -10,6 +10,7 @@
 //! It's controlled by [`super::app::AppModel`].
 
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 use tokio::task::JoinHandle;
 
 use crate::structures::asset_index::{AssetIndex, AssetIndexError};
@@ -92,6 +93,9 @@ impl AsyncWorkerModel {
 		))));
 		let _ = sender.output(AppMsg::ShowProgressBar);
 
+		let mut last_bar_update = Instant::now();
+		let download_started = Instant::now();
+
 		// Iterate over assets
 		for (i, asset) in index.get_assets().enumerate() {
 			// Spawn new task
@@ -107,13 +111,13 @@ impl AsyncWorkerModel {
 							break;
 						}
 						debug!("Failed to download {} asset, retrying in 10ms. Retry: {retries}. Error: {e}", asset.hash);
-						tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+						tokio::time::sleep(Duration::from_millis(10)).await;
 					}
 				}))
 				.await;
 
-			// Send progress bar updates every 20 assets (to avoid spamming the UI)
-			if i % 20 == 0 {
+			// Send progress bar updates at most every 10 millis (to avoid spamming the UI)
+			if last_bar_update.elapsed() > Duration::from_millis(10) {
 				// Update progress bar text
 				let _ = sender.output(AppMsg::SetProgressBarText(Some(format!(
 					"Downloading assets ({i}/{})",
@@ -123,11 +127,19 @@ impl AsyncWorkerModel {
 				// Update progress bar
 				let fraction = (i as f64) / length;
 				let _ = sender.output(AppMsg::SetProgressBarFraction(fraction));
+
+				// Renew last update time
+				last_bar_update = Instant::now();
 			}
 		}
 
 		// Wait for all tasks to finish
 		parallel.wait().await;
+
+		info!(
+			"Assets downloaded in {}",
+			download_started.elapsed().as_secs_f64()
+		);
 
 		// Hide progress bar
 		let _ = sender.output(AppMsg::HideProgressBar);
@@ -179,7 +191,7 @@ impl Worker for AsyncWorkerModel {
 			}
 			AsyncWorkerMsg::HelloWorld => {
 				self.runtime.spawn(async move {
-					tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+					tokio::time::sleep(Duration::from_secs(1)).await;
 					println!("Hello world from async worker");
 				});
 			}
