@@ -1,5 +1,5 @@
 [package]
-name = "firesquare-launcher"
+name = "firelaunch"
 version = "0.1.0"
 edition = "2021"
 description = "firesquare minecraft launcher"
@@ -17,12 +17,12 @@ relm4-components = "0.5.0-rc.2"
 tracker = "^0.2" # struct change tracking
 
 # logging
-log = "^0.4" # logging facade
-env_logger = "^0.10" # logging formatter
+log = "^0.4"                                                   # logging facade
+env_logger = "^0.10"                                           # logging formatter
 log-panics = { version = "^2", features = ["with-backtrace"] } # log panics
 
 # error handling
-anyhow = "^1.0" # error handling
+anyhow = "^1.0"    # error handling
 thiserror = "^1.0" # for creating custom errors
 
 # networking
@@ -33,20 +33,20 @@ reqwest = { version = "^0.11", default-features = false, features = [
 
 # serialization
 serde = { version = "^1.0", features = ["derive"] } # serialization
-serde_json = "^1.0" # json serialization
+serde_json = "^1.0"                                 # json serialization
 
 # async
 tokio = { version = "^1.25", features = ["full"] } # async runtime
 
 # filesystem
 dirs = "^4.0" # well known dirs
-zip = "^0.6" # zip (jar) file handling
+zip = "^0.6"  # zip (jar) file handling
 
 # crypto
 sha1 = "^0.10" # for minecraft assets
-sha256 = "^1" # for authorization
-hex = "^0.4" # for converting bytes to hex
-rand = "^0.8" # salt generation
+sha256 = "^1"  # for authorization
+hex = "^0.4"   # for converting bytes to hex
+rand = "^0.8"  # salt generation
 
 # other
 num_cpus = "^1.15" # cpu count

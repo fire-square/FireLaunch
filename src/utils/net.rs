@@ -83,7 +83,7 @@ impl NetClient {
 	/// # Examples
 	///
 	/// ```
-	/// use firesquare_launcher::utils::net::NetClient;
+	/// use firelaunch::utils::net::NetClient;
 	///
 	/// let client = NetClient::new();
 	/// assert_eq!("https://ipfs.frsqr.xyz/ipfs/CID", client.ipfs("CID"));
@@ -145,7 +145,7 @@ impl Default for NetClient {
 /// # Examples
 ///
 /// ```
-/// use firesquare_launcher::utils::net::download_to;
+/// use firelaunch::utils::net::download_to;
 /// use tokio::runtime::Runtime;
 /// use std::path::Path;
 ///
@@ -196,7 +196,7 @@ pub async fn download_to(client: &Client, url: &str, path: &Path) -> Result<(), 
 /// # Examples
 ///
 /// ```
-/// use firesquare_launcher::utils::net::download_and_hash;
+/// use firelaunch::utils::net::download_and_hash;
 /// use tokio::runtime::Runtime;
 /// use std::path::Path;
 ///

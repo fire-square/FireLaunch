@@ -16,7 +16,7 @@ use tokio::task::JoinHandle;
 ///
 /// ```
 /// use tokio::runtime::Runtime;
-/// use firesquare_launcher::utils::parallel::Parallelise;
+/// use firelaunch::utils::parallel::Parallelise;
 ///
 /// let rt = Runtime::new().unwrap();
 /// rt.block_on(async {
@@ -100,22 +100,10 @@ impl<T> Parallelise<T> {
 	///
 	/// This function will wait for all tasks to finish before returning.
 	pub async fn wait(&mut self) {
-		loop {
-			// Find finished tasks and remove them
-			for (j, task) in self.tasks.iter_mut().enumerate() {
-				if task.is_finished() {
-					// And remove it from the set
-					self.tasks.remove(j);
-					break;
-				}
-			}
-			// If set is empty, break
-			if self.tasks.is_empty() {
-				break;
-			}
-			// Sleep for 5ms to avoid busy waiting and check again
-			tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+		for task in self.tasks.iter_mut() {
+			let _ = task.await.unwrap();
 		}
+		self.tasks.clear();
 	}
 }
 
