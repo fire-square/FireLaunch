@@ -1,9 +1,9 @@
 // Prevents console window from appearing on Windows
 #![windows_subsystem = "windows"]
 
-use firesquare_launcher::gui::AppModel;
-use firesquare_launcher::utils::init_logging;
-use firesquare_launcher::{NAME, VERSION};
+use firelaunch::gui::AppModel;
+use firelaunch::utils::init_logging;
+use firelaunch::{NAME, VERSION};
 
 fn main() {
 	init_logging();

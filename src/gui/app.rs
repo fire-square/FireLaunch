@@ -57,7 +57,7 @@ impl SimpleComponent for AppModel {
 		#[root]
 		gtk::ApplicationWindow {
 			set_title: Some("FireLaunch"),
-			set_icon_name: Some("firesquare-launcher"),
+			set_icon_name: Some("firelaunch"),
 			gtk::Box {
 				set_orientation: gtk::Orientation::Vertical,
 				set_valign: gtk::Align::Fill,

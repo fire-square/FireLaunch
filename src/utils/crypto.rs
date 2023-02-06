@@ -13,7 +13,7 @@ use sha1::Digest;
 /// # Examples
 ///
 /// ```
-/// use firesquare_launcher::utils::crypto::generate_random_string;
+/// use firelaunch::utils::crypto::generate_random_string;
 ///
 /// let random_string = generate_random_string(10);
 /// assert_eq!(random_string.len(), 10);
@@ -35,7 +35,7 @@ pub fn generate_random_string(length: usize) -> String {
 /// # Examples
 ///
 /// ```
-/// use firesquare_launcher::utils::crypto::sha256_digest;
+/// use firelaunch::utils::crypto::sha256_digest;
 ///
 /// let data = b"Hello, world!";
 /// let digest = sha256_digest(data);
@@ -56,7 +56,7 @@ pub fn sha256_digest(data: &[u8]) -> String {
 /// # Examples
 ///
 /// ```
-/// use firesquare_launcher::utils::crypto::sha1_digest;
+/// use firelaunch::utils::crypto::sha1_digest;
 ///
 /// let data = b"Hello, world!";
 /// let digest = sha1_digest(data);

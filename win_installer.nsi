@@ -12,7 +12,7 @@
 !define PRODUCT_VERSION "0.1.0"
 !define PRODUCT_PUBLISHER "Egor Ternovoy"
 !define PRODUCT_WEB_SITE "https://frsqr.xyz/"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\firesquare-launcher.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\firelaunch.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
@@ -38,7 +38,7 @@
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\firesquare-launcher.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\firelaunch.exe"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -112,18 +112,18 @@ Section "MainSection" SEC01
   File "libs\libzstd.dll"
   File "libs\zlib1.dll"
   SetOverwrite ifnewer
-  File "target\release\firesquare-launcher.exe"
+  File "target\release\firelaunch.exe"
   CreateDirectory "$SMPROGRAMS\FireLaucnh"
-  CreateShortCut "$SMPROGRAMS\FireLaucnh\FireLaucnh.lnk" "$INSTDIR\firesquare-launcher.exe"
-  CreateShortCut "$DESKTOP\FireLaucnh.lnk" "$INSTDIR\firesquare-launcher.exe"
+  CreateShortCut "$SMPROGRAMS\FireLaucnh\FireLaucnh.lnk" "$INSTDIR\firelaunch.exe"
+  CreateShortCut "$DESKTOP\FireLaucnh.lnk" "$INSTDIR\firelaunch.exe"
 SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\firesquare-launcher.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\firelaunch.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\firesquare-launcher.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\firelaunch.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
@@ -132,18 +132,18 @@ SectionEnd
 
 Function un.onUninstSuccess
   HideWindow
-  MessageBox MB_ICONINFORMATION|MB_OK "Удаление программы ${PRODUCT_NAME} было успешно завершено."
+  MessageBox MB_ICONINFORMATION|MB_OK "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ${PRODUCT_NAME} пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ."
 FunctionEnd
 
 Function un.onInit
 !insertmacro MUI_UNGETLANGUAGE
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Вы уверены в том, что желаете удалить ${PRODUCT_NAME} и все компоненты программы?" IDYES +2
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ ${PRODUCT_NAME} пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ?" IDYES +2
   Abort
 FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\firesquare-launcher.exe"
+  Delete "$INSTDIR\firelaunch.exe"
   Delete "$INSTDIR\zlib1.dll"
   Delete "$INSTDIR\libzstd.dll"
   Delete "$INSTDIR\libwinpthread-1.dll"

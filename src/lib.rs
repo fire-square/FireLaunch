@@ -16,7 +16,7 @@
 //! - [ ] Logging in to Firesquare account
 //! - [ ] Deb, RPM, Flatpak, AppImage, Snap, MSI packages
 
-#![doc(html_root_url = "https://docs.rs/firesquare-launcher/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/firelaunch/0.1.0")]
 #![warn(clippy::all)]
 #![warn(missing_docs)]
 #![deny(unsafe_code)]
