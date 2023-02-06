@@ -12,7 +12,7 @@ include = ["/src", "/resources", "/win_res.rc", "/LICENSE"]
 # gtk4 gui
 gtk4 = "^0.5"
 relm4 = { version = "0.5.0-rc.1", features = [ "libadwaita" ] } # gui framework
-relm4-macros = "0.5.0-rc.1"
+relm4-macros = "0.5.0-rc.2"
 relm4-components = "0.5.0-rc.1"
 tracker = "^0.2" # struct change tracking
 
