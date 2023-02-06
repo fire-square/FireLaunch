@@ -33,7 +33,6 @@
           graphene
           gtk4
           libadwaita
-          openssl
         ];
 
         firelaunch = pkgs.stdenv.mkDerivation {
