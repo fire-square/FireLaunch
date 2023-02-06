@@ -2,7 +2,7 @@
   description = "FireLaunch Minecraft Launcher";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/652e92b8064949a11bc193b90b74cb727f2a1405";
 
     flake-utils.url = "github:numtide/flake-utils";
 
