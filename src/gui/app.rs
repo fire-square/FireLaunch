@@ -60,25 +60,38 @@ impl SimpleComponent for AppModel {
 			set_icon_name: Some("firelaunch"),
 			gtk::Box {
 				set_orientation: gtk::Orientation::Vertical,
-				set_spacing: 5,
-				set_margin_all: 10,
-				gtk::Button {
-					set_label: "Запустить minecraft",
-					connect_clicked[sender] => move |_| {
-						sender.input(AppMsg::LaunchMinecraft)
-					}
+				set_valign: gtk::Align::Fill,
+
+				gtk::Box {
+					set_orientation: gtk::Orientation::Vertical,
+					set_spacing: 5,
+					set_margin_all: 10,
+
+					gtk::Button {
+						set_label: "Запустить minecraft",
+						connect_clicked[sender] => move |_| {
+							sender.input(AppMsg::LaunchMinecraft)
+						}
+					},
+
+					gtk::Button {
+						set_label: "Заставить кофоба работать",
+						connect_clicked[sender] => move |_| {
+							sender.input(AppMsg::ForceCofob)
+						}
+					},
+
+					#[name = "progress_bar"]
+					gtk::ProgressBar {
+						set_fraction: 0.0,
+						set_show_text: true,
+					},
 				},
-				append = &gtk::Button {
-					set_label: "Заставить кофоба работать",
-					connect_clicked[sender] => move |_| {
-						sender.input(AppMsg::ForceCofob)
-					}
-				},
-				#[name = "progress_bar"]
-				append = &gtk::ProgressBar {
-					set_fraction: 0.0,
-					set_show_text: true,
-				},
+
+				// TODO: this should be at the very bottom
+				gtk::Label {
+					set_label: &format!("Version: {}-{}", env!("VERGEN_GIT_SEMVER"), env!("VERGEN_GIT_SHA_SHORT")),
+				}
 			}
 		}
 	}
