@@ -25,6 +25,8 @@
 
         nativeBuildInputs = with pkgs; [
           pkg-config
+          clang
+          mold
         ] ++ [
           rustVersion
         ];
