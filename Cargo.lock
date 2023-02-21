@@ -399,7 +399,7 @@ dependencies = [
  "rand",
  "relm4",
  "relm4-components",
- "relm4-macros",
+ "relm4-macros 0.6.0-alpha.1",
  "reqwest",
  "serde",
  "serde_json",
@@ -1568,7 +1568,7 @@ dependencies = [
  "gtk4",
  "libadwaita",
  "once_cell",
- "relm4-macros",
+ "relm4-macros 0.5.0",
  "tokio",
  "tracing",
 ]
@@ -1587,9 +1587,20 @@ dependencies = [
 
 [[package]]
 name = "relm4-macros"
-version = "0.5.0-rc.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "215bd73732fae1b978f1274484bc48db07f11fe00fa309207fc541cc99148812"
+checksum = "aaf49f6588ecac70fd6163110ed7e294195cc5c9c82efb7b3150b9ca87486a72"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "relm4-macros"
+version = "0.6.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25c11642516610c5b688b1284964d87cad7d2338c3c0ec94434bed6a895f27b9"
 dependencies = [
  "proc-macro2",
  "quote",
