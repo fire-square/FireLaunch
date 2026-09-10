@@ -1,3 +1,5 @@
+> **Archival notice:** This repository is archived and no longer maintained.
+
 # firesquare launcher
 
 This is a minecraft launcher. Currently it is in development and not ready for use.
